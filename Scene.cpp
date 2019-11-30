@@ -90,15 +90,15 @@ double** Scene::getMvp(Camera *camera){
 }
 
 
+Matrix4 Scene::getTransMatrix(Scaling scale)
+{
+
+}
 Matrix4 Scene::getRotMatrix(Rotation rot)
 {
 
 }
 Matrix4 Scene::getTransMatrix(Translation trans)
-{
-
-}
-Matrix4 Scene::getTransMatrix(Scaling scale)
 {
 
 }
