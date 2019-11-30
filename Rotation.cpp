@@ -6,7 +6,7 @@ using namespace std;
 
 Rotation::Rotation() {}
 
-Rotation::Rotation(int rotationId, double angle, double x, double y, double z)
+Rotation::Rotation(int rotationId, double angle, double ux, double uy, double uz)
 {
     this->rotationId = rotationId;
     this->angle = angle;
