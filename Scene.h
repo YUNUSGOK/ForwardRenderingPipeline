@@ -43,6 +43,11 @@ public:
 	int makeBetweenZeroAnd255(double value);
 	void writeImageToPPMFile(Camera* camera);
 	void convertPPMToPNG(string ppmFileName, int osType);
+
+	double** getMcam(Camera *camera);
+	double** getMp2o(Camera *camera);
+	double** getMorth(Camera *camera);
+	double** getMvp(Camera *camera);
 };
 
 #endif
