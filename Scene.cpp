@@ -23,9 +23,19 @@ using namespace std;
 	Transformations, clipping, culling, rasterization are done here.
 	You can define helper functions inside Scene class implementation.
 */
+
+
+double** Scene::getMcam(Camera *camera);
+
+double** Scene::getMp20(Camera *camera);
+double** Scene::getMorth(Camera *camera);
+double** Scene::getMvp(Camera *camera);
+
+
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
-	// TODO: Implement this function.
+		Matrix4 Mcam(getMcam(camera));
+
 }
 
 /*
