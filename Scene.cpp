@@ -143,7 +143,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 			Matrix4 Mp2o(getIdentityMatrix());
 
 
-		for(int modelNum=0; i<modelSize; modelNum++)
+		for(int modelNum=0; modelNum<modelSize; modelNum++)
 		{
 			model = models[modelNum];
 			Mtotal = multiplyMatrixWithMatrix(getMmodel(model),Mtotal);
@@ -152,7 +152,26 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
 			//culling
 			//clipping
+			triSize = model->triangles.size();
 
+			for(int triNum=0; triNum<triSize ; triNum++ )
+			{
+				Triangle tri = model->triangles[triNum];
+				Vec3 vertex1 = vertices[tri.getFirstVertexId()-1];
+				Vec3 vertex2 = vertices[tri.getSecondVertexId()-1];
+				Vec3 vertex3 = vertices[tri.getThirdVertexId()-1];
+
+				Vec4 v1(vertex1.x,vertex1.y,vertex1.z,1,vertex1.colorId);
+				Vec4 v2(vertex2.x,vertex2.y,vertex2.z,1,vertex2.colorId);
+				Vec4 v3(vertex3.x,vertex3.y,vertex3.z,1,vertex3.colorId);
+
+
+				v1= multiplyMatrixWithVec4(Mtotal,v1);
+				v2= multiplyMatrixWithVec4(Mtotal,v2);
+				v3= multiplyMatrixWithVec4(Mtotal,v3);
+
+
+			}
 
 
 		}

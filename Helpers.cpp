@@ -105,6 +105,17 @@ Vec3 multiplyVec3WithScalar(Vec3 v, double c)
     return result;
 }
 
+Vec4 multiplyVec4WithScalar(Vec4 v, double c)
+{
+    Vec4 result;
+    result.x = v.x * c;
+    result.y = v.y * c;
+    result.z = v.z * c;
+    result.t = v.t *c ;
+
+    return result;
+}
+
 /*
  * Prints elements in a vec3. Can be used for debugging purposes.
  */

@@ -48,6 +48,9 @@ Vec3 subtractVec3(Vec3 a, Vec3 b);
  */
 Vec3 multiplyVec3WithScalar(Vec3 v, double c);
 
+
+Vec3 multiplyVec4WithScalar(Vec4 v, double c);
+
 /*
  * Prints elements in a vec3. Can be used for debugging purposes.
  */
@@ -63,6 +66,7 @@ int areEqualVec3(Vec3 a, Vec3 b);
  * Returns an identity matrix (values on the diagonal are 1, others are 0).
 */
 Matrix4 getIdentityMatrix();
+
 
 /*
  * Multiply matrices m1 (Matrix4) and m2 (Matrix4) and return the result matrix r (Matrix4).
