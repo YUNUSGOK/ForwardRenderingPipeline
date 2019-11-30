@@ -90,11 +90,11 @@ double** Scene::getMvp(Camera *camera){
 }
 
 
-Matrix4 Scene::getTransMatrix(Scaling scale)
+Matrix4 Scene::getScalingMatrix(Scaling scale)
 {
 
 }
-Matrix4 Scene::getScalingMatrix(Translation trans)
+Matrix4 Scene::getTransMatrix(Translation trans)
 {
 
 }
