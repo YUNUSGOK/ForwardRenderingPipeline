@@ -85,7 +85,8 @@ double** Scene::getMvp(Camera *camera){
 	{
 		{camera->horRes/2,0,0,(camera->horRes-1)/2	},
 		{0,camera->verRes/2,0,(camera->verRes-1)/2	},
-		{0,0,0.5,0.5}
+		{0,0,0.5,0.5},
+		{0,0,0,0}
 	};
 }
 
@@ -127,10 +128,10 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 		Matrix4 Mtotal(getIdentityMatrix());
 		vector<Matrix4> Mmodels;
 		int vertixSize = vertices.size();
-		vector< Vec3 > curr_vertices;
+		vector< Vec3 > image_vertices;
 		for(int i=0; i< vertixSize; i++)
 		{
-			curr_vertices.push_back(Vec3(vertices[i]->x,vertices[i]->y,vertices[i]->z,vertices[i]->colorId));
+			image_vertices.push_back(Vec4(vertices[i]->x,vertices[i]->y,vertices[i]->z,1,vertices[i]->colorId));
 		}
 
 
@@ -150,8 +151,6 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 			Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
 			Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
 			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
-			//culling
-			//clipping
 			triSize = model->triangles.size();
 
 			for(int triNum=0; triNum<triSize ; triNum++ )
@@ -161,14 +160,52 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				Vec3 vertex2 = vertices[tri.getSecondVertexId()-1];
 				Vec3 vertex3 = vertices[tri.getThirdVertexId()-1];
 
-				Vec4 v1(vertex1.x,vertex1.y,vertex1.z,1,vertex1.colorId);
-				Vec4 v2(vertex2.x,vertex2.y,vertex2.z,1,vertex2.colorId);
-				Vec4 v3(vertex3.x,vertex3.y,vertex3.z,1,vertex3.colorId);
-
+				Vec4 v1(vertex1);
+				Vec4 v2(vertex2);
+				Vec4 v3(vertex3);
 
 				v1= multiplyMatrixWithVec4(Mtotal,v1);
 				v2= multiplyMatrixWithVec4(Mtotal,v2);
 				v3= multiplyMatrixWithVec4(Mtotal,v3);
+				//culling
+				//clipping
+
+				//start::perspective divide
+				v1 = multiplyVec4WithScalar(v1,1/v1.t);
+				v2 = multiplyVec4WithScalar(v2,1/v1.t);
+				v3 = multiplyVec4WithScalar(v3,1/v1.t);
+				//end::perspective divide
+
+				//start::ViewPort Transformation
+				v1 = multiplyMatrixWithVec4(Mvp,v1);
+				v2 = multiplyMatrixWithVec4(Mvp,v2);
+				v3 = multiplyMatrixWithVec4(Mvp,v3);
+				//end::ViewPort Transformation
+
+				raster (v1,v2);
+				raster (v2,v3);
+				raster (v3,v1);
+
+				if(slope(v1,v2)<=1 && slope(v1,v2)>=0 )//region 1-5
+				{
+					if(v1.x<v2.x) midpoint(v1,v2,1)
+					else midpoint(v2,v1,4);
+				}
+				if(slope(v1,v2)>-1 && slope(v1,v2)>0 )//region 4-8
+				{
+					if(v1.x<v2.x) midpoint(v1,v2,)
+					else midpoint2(v2,v1);
+				}
+				if(slope(v1,v2)>1 )//region 2-6
+				{
+					if(v1.x<v2.x) midpoint3(v1,v2)
+					else midpoint3(v2,v1);
+				}
+				if(slope(v1,v2)<-1 )//region 3-8
+				{
+					if(v1.x<v2.x) midpoint3(v1,v2)
+					else midpoint3(v2,v1);
+				}
 
 
 			}

@@ -21,6 +21,14 @@ Vec3 crossProductVec3(Vec3 a, Vec3 b)
     return result;
 }
 
+double slope(Vec4 v1,Vec4 v2)
+{
+  double dy = v2.y-v1.y;
+  double dx = v2.x-v1.x;
+  if(dy==0) return 10;
+  return dy/dx;
+}
+
 /*
  * Calculate dot product of vec3 a, vec3 b and return resulting value.
  */
