@@ -43,39 +43,61 @@ double** Scene::getMorth(Camera *camera){
 double** Scene::getMvp(Camera *camera){
 	double m[4][4]=
 	{
-		{camera->horRes,0,0,(camera->horRes-1)/2	},
-		{0,camera->verRes,0,(camera->verRes-1)/2	},
+		{camera->horRes/2,0,0,(camera->horRes-1)/2	},
+		{0,camera->verRes/2,0,(camera->verRes-1)/2	},
 		{0,0,0.5,0.5}
 	};
 }
 
+Matrix4 Scene::getMmodel(Model * model)
+{
+	Matrix4 Mmodel(getIdentityMatrix);
+	for(int i=0; model->numberOfTransformations ;i++)
+	{
+		if(transformationType[i]=='r')
+			Mmodel = multiplyMatrixWithMatrix(getRotationMatrix(rotations[transformationIds[i]-1]),Mmodel);
+		else if(transformationType[i]=='s')
+			Mmodel = multiplyMatrixWithMatrix(getScalingMatrix(scalings[transformationIds[i]-1]),Mmodel);
+		else if(transformationType[i]=='t')
+			Mmodel = multiplyMatrixWithMatrix(getTranslationMatrix(translations[transformationIds[i]-1]),Mmodel);
+	}
+	return Mmodel;
+}
 
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
-		//Start::Vertex Processing
-		vector< Vec3* > transformed_vertices = vertices;
+
 		int modelSize =models.size();
 		int triSize;
 		Model *model;
-		for(int modelNum=0; i<modelSize; modelNum++)
+		Matrix4 Mtotal(getIdentityMatrix());
+		vector<Matrix4> Mmodels;
+		int vertixSize = vertices.size();
+		vector< Vec3 > curr_vertices;
+		for(int i=0; i< vertixSize; i++)
 		{
-			model = models[modelNum];
-			triSize = model->triangles.size();
-			for(int triNum = 0; triNum<triSize; triNum++)
-			{
-				Triangle *triangle = 	model->triangles[triNum];
-				Vertex* vertex1 = vertices[triangle->getFirstVertexId]
-			}
+			curr_vertices.push_back(Vec3(vertices[i]->x,vertices[i]->y,vertices[i]->z,vertices[i]->colorId));
 		}
 
-		//Start::Vertex Processing
+
 		Matrix4 Mcam(getMcam(camera));
 		Matrix4 Mvp(getMvp(camera));
 		Matrix4 MOrth(getMOrth(camera));
 		if(projectionType==1)
 			Matrix4 Mp2o(getMp2o(camera));
 		else
-			Matrix4 Mp2o(getIdentityMatrix);
+			Matrix4 Mp2o(getIdentityMatrix());
+
+		//Start::Vertex Processing
+		for(int modelNum=0; i<modelSize; modelNum++)
+		{
+			model = models[modelNum];
+			Mtotal = multiplyMatrixWithMatrix(getMmodel(model),Mtotal);
+			Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
+			Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
+			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
+		}
+		//End::Vertex Processing
 
 
 }
