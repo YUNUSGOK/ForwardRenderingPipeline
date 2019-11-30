@@ -89,18 +89,60 @@ double** Scene::getMvp(Camera *camera){
 	};
 }
 
-
-Matrix4 Scene::getTransMatrix(Scaling scale)
+Matrix4 Scene::getTransMatrix(Translation trans)
 {
+	double t[4][4] = {
+						{1, 0, 0, trans.tx},
+						{0, 1, 0, trans.ty},
+						{0, 0, 1, trans.ty},
+						{0, 0, 0, 0}
+					};
+
+	return Matrix4(t);
+}
+
+Matrix4 Scene::getScalingMatrix(Scaling scale)
+{
+	double s[4][4] = {
+						{scale.sx, 0, 0, 0},
+						{0, scale.sx, 0, 0},
+						{0, 0, scale.sz, 0},
+						{0, 0, 0, 1}
+					};
+	return Matrix4(s);
 
 }
-Matrix4 Scene::getScalingMatrix(Translation trans)
-{
 
-}
+
 Matrix4 Scene::getRotMatrix(Rotation rot)
 {
+	Vec3 u = {rot.ux, rot.uy, rot.uz};
+	Vec3 v = {-rot.uy, rot.ux, 0};
+	vec3 w = crossProductVec3(u, v);
+	double angle = rot.angle;
+	double r[4][4];
+	double M[4][4] = {
+						{u.x, u.y, u.z, 0},
+						{v.x, v.y, v.z, 0},
+						{w.x, w.y, w.z, 0},
+						{0, 0, 0, 1}
+					};
+	double inverseM[4][4] =  {
+								{u.x, v.x, w.x, 0},
+								{u.y, v.y, w.y, 0},
+								{u.z, v.z, w.z, 0},
+								{0, 0, 0, 1}
+							};
+	double Ra[4][4] = {
+						{1, 0, 0, 0},
+						{0, cos(angle*pi/180.0), -sin(angle*pi/180.0) , 0},
+						{0, sin(angle*pi/180.0), cos(angle*pi/180.0), 0},
+						{0, 0, 0, 1}
+					};
 
+	Matrix4 RaM = multiplyMatrixWithMatrix(Matrix4(Ra), Matrix4(M));
+
+return multiplyMatrixWithMatrix(Matrix4(inverseM), RaM);
 }
 
 Matrix4 Scene::getMmodel(Model * model)

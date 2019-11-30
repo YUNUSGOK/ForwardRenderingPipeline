@@ -48,6 +48,10 @@ public:
 	double** getMp2o(Camera *camera);
 	double** getMorth(Camera *camera);
 	double** getMvp(Camera *camera);
+	Matrix4 getTransMatrix(Translation trans);
+	Matrix4 getScalingMatrix(Scaling scale);
+	Matrix4 getRotMatrix(Rotation rot);
+
 };
 
 #endif
