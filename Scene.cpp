@@ -52,6 +52,7 @@ Matrix4 Scene::getMcam(Camera *camera) {
 	double T[4][4];
 	Matrix4 Mcam;
 
+<<<<<<< HEAD
 	R = {
 		{u.x, u.y, u.z, 0},
 		{v.x, v.y, v.z, 0},
@@ -85,11 +86,82 @@ double** Scene::getMp2o(Camera *camera)
 
 double** Scene::getMorth(Camera *camera);
 double** Scene::getMvp(Camera *camera);
+=======
+double** Scene::getMcam(Camera *camera)
 
+double** Scene::getMp2o(Camera *camera)
+>>>>>>> bd6cd988b0674d636e577407679ab02b4803fc21
+
+double** Scene::getMorth(Camera *camera){
+	double m[4][4]=
+	{
+		{2/(camera->right-camera->left),0,0, -(camera->right+camera->left)/(camera->right-camera->left)},
+		{0,2/(camera->top-camera->bottom),0, -(camera->top+camera->bottom)/(camera->top-camera->bottom)},
+		{0,0,-2/(camera->far-camera->near), -(camera->far+camera->near)/(camera->far-camera->near)},
+		{0,0,0,1}
+	}
+	return m;
+
+}
+double** Scene::getMvp(Camera *camera){
+	double m[4][4]=
+	{
+		{camera->horRes/2,0,0,(camera->horRes-1)/2	},
+		{0,camera->verRes/2,0,(camera->verRes-1)/2	},
+		{0,0,0.5,0.5}
+	};
+}
+
+Matrix4 Scene::getMmodel(Model * model)
+{
+	Matrix4 Mmodel(getIdentityMatrix);
+	for(int i=0; model->numberOfTransformations ;i++)
+	{
+		if(transformationType[i]=='r')
+			Mmodel = multiplyMatrixWithMatrix(getRotationMatrix(rotations[transformationIds[i]-1]),Mmodel);
+		else if(transformationType[i]=='s')
+			Mmodel = multiplyMatrixWithMatrix(getScalingMatrix(scalings[transformationIds[i]-1]),Mmodel);
+		else if(transformationType[i]=='t')
+			Mmodel = multiplyMatrixWithMatrix(getTranslationMatrix(translations[transformationIds[i]-1]),Mmodel);
+	}
+	return Mmodel;
+}
 
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
+
+		int modelSize =models.size();
+		int triSize;
+		Model *model;
+		Matrix4 Mtotal(getIdentityMatrix());
+		vector<Matrix4> Mmodels;
+		int vertixSize = vertices.size();
+		vector< Vec3 > curr_vertices;
+		for(int i=0; i< vertixSize; i++)
+		{
+			curr_vertices.push_back(Vec3(vertices[i]->x,vertices[i]->y,vertices[i]->z,vertices[i]->colorId));
+		}
+
+
 		Matrix4 Mcam(getMcam(camera));
+		Matrix4 Mvp(getMvp(camera));
+		Matrix4 MOrth(getMOrth(camera));
+		if(projectionType==1)
+			Matrix4 Mp2o(getMp2o(camera));
+		else
+			Matrix4 Mp2o(getIdentityMatrix());
+
+
+		for(int modelNum=0; i<modelSize; modelNum++)
+		{
+			model = models[modelNum];
+			Mtotal = multiplyMatrixWithMatrix(getMmodel(model),Mtotal);
+			Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
+			Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
+			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
+		}
+
+
 
 }
 
