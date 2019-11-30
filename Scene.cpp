@@ -23,23 +23,6 @@ using namespace std;
 	Transformations, clipping, culling, rasterization are done here.
 	You can define helper functions inside Scene class implementation.
 */
-double Vec3::getElementAt(int index)
-{
-    switch (index)
-    {
-    case 0:
-        return this->x;
-
-    case 1:
-        return this->y;
-
-    case 2:
-        return this->z;
-
-    default:
-        return this->z;
-    }
-}
 
 Matrix4 Scene::getMcam(Camera *camera) {
 	Vec3 u = camera->u;
@@ -52,7 +35,7 @@ Matrix4 Scene::getMcam(Camera *camera) {
 	double T[4][4];
 	Matrix4 Mcam;
 
-<<<<<<< HEAD
+
 	R = {
 		{u.x, u.y, u.z, 0},
 		{v.x, v.y, v.z, 0},
@@ -84,13 +67,7 @@ double** Scene::getMp2o(Camera *camera)
 	return Mp2o;
 }
 
-double** Scene::getMorth(Camera *camera);
-double** Scene::getMvp(Camera *camera);
-=======
-double** Scene::getMcam(Camera *camera)
 
-double** Scene::getMp2o(Camera *camera)
->>>>>>> bd6cd988b0674d636e577407679ab02b4803fc21
 
 double** Scene::getMorth(Camera *camera){
 	double m[4][4]=
