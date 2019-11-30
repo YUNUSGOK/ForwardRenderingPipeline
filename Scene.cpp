@@ -25,16 +25,58 @@ using namespace std;
 */
 
 
-double** Scene::getMcam(Camera *camera);
+double** Scene::getMcam(Camera *camera)
 
-double** Scene::getMp20(Camera *camera);
-double** Scene::getMorth(Camera *camera);
-double** Scene::getMvp(Camera *camera);
+double** Scene::getMp2o(Camera *camera)
+
+double** Scene::getMorth(Camera *camera){
+	double m[4][4]=
+	{
+		{2/(camera->right-camera->left),0,0, -(camera->right+camera->left)/(camera->right-camera->left)},
+		{0,2/(camera->top-camera->bottom),0, -(camera->top+camera->bottom)/(camera->top-camera->bottom)},
+		{0,0,-2/(camera->far-camera->near), -(camera->far+camera->near)/(camera->far-camera->near)},
+		{0,0,0,1}
+	}
+	return m;
+
+}
+double** Scene::getMvp(Camera *camera){
+	double m[4][4]=
+	{
+		{camera->horRes,0,0,(camera->horRes-1)/2	},
+		{0,camera->verRes,0,(camera->verRes-1)/2	},
+		{0,0,0.5,0.5}
+	};
+}
 
 
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
+		//Start::Vertex Processing
+		vector< Vec3* > transformed_vertices = vertices;
+		int modelSize =models.size();
+		int triSize;
+		Model *model;
+		for(int modelNum=0; i<modelSize; modelNum++)
+		{
+			model = models[modelNum];
+			triSize = model->triangles.size();
+			for(int triNum = 0; triNum<triSize; triNum++)
+			{
+				Triangle *triangle = 	model->triangles[triNum];
+				Vertex* vertex1 = vertices[triangle->getFirstVertexId]
+			}
+		}
+
+		//Start::Vertex Processing
 		Matrix4 Mcam(getMcam(camera));
+		Matrix4 Mvp(getMvp(camera));
+		Matrix4 MOrth(getMOrth(camera));
+		if(projectionType==1)
+			Matrix4 Mp2o(getMp2o(camera));
+		else
+			Matrix4 Mp2o(getIdentityMatrix);
+
 
 }
 
