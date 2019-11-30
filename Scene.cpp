@@ -102,7 +102,6 @@ Matrix4 Scene::getScalingMatrix(Scaling scale)
 
 	return Matrix4(t);
 }
-<<<<<<< HEAD
 
 Matrix4 Scene::getScalingMatrix(Scaling scale)
 {
