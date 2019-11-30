@@ -85,11 +85,13 @@ double** Scene::getMvp(Camera *camera){
 	{
 		{camera->horRes/2,0,0,(camera->horRes-1)/2	},
 		{0,camera->verRes/2,0,(camera->verRes-1)/2	},
-		{0,0,0.5,0.5}
+		{0,0,0.5,0.5},
+		{0,0,0,0}
 	};
 }
 
-Matrix4 Scene::getTransMatrix(Translation trans)
+
+Matrix4 Scene::getScalingMatrix(Scaling scale)
 {
 	double t[4][4] = {
 						{1, 0, 0, trans.tx},
@@ -100,6 +102,7 @@ Matrix4 Scene::getTransMatrix(Translation trans)
 
 	return Matrix4(t);
 }
+<<<<<<< HEAD
 
 Matrix4 Scene::getScalingMatrix(Scaling scale)
 {
@@ -169,10 +172,10 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 		Matrix4 Mtotal(getIdentityMatrix());
 		vector<Matrix4> Mmodels;
 		int vertixSize = vertices.size();
-		vector< Vec3 > curr_vertices;
+		vector< Vec3 > image_vertices;
 		for(int i=0; i< vertixSize; i++)
 		{
-			curr_vertices.push_back(Vec3(vertices[i]->x,vertices[i]->y,vertices[i]->z,vertices[i]->colorId));
+			image_vertices.push_back(Vec4(vertices[i]->x,vertices[i]->y,vertices[i]->z,1,vertices[i]->colorId));
 		}
 
 
@@ -185,16 +188,71 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 			Matrix4 Mp2o(getIdentityMatrix());
 
 
-		for(int modelNum=0; i<modelSize; modelNum++)
+		for(int modelNum=0; modelNum<modelSize; modelNum++)
 		{
 			model = models[modelNum];
 			Mtotal = multiplyMatrixWithMatrix(getMmodel(model),Mtotal);
 			Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
 			Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
 			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
-			//culling
-			//clipping
+			triSize = model->triangles.size();
 
+			for(int triNum=0; triNum<triSize ; triNum++ )
+			{
+				Triangle tri = model->triangles[triNum];
+				Vec3 vertex1 = vertices[tri.getFirstVertexId()-1];
+				Vec3 vertex2 = vertices[tri.getSecondVertexId()-1];
+				Vec3 vertex3 = vertices[tri.getThirdVertexId()-1];
+
+				Vec4 v1(vertex1);
+				Vec4 v2(vertex2);
+				Vec4 v3(vertex3);
+
+				v1= multiplyMatrixWithVec4(Mtotal,v1);
+				v2= multiplyMatrixWithVec4(Mtotal,v2);
+				v3= multiplyMatrixWithVec4(Mtotal,v3);
+				//culling
+				//clipping
+
+				//start::perspective divide
+				v1 = multiplyVec4WithScalar(v1,1/v1.t);
+				v2 = multiplyVec4WithScalar(v2,1/v1.t);
+				v3 = multiplyVec4WithScalar(v3,1/v1.t);
+				//end::perspective divide
+
+				//start::ViewPort Transformation
+				v1 = multiplyMatrixWithVec4(Mvp,v1);
+				v2 = multiplyMatrixWithVec4(Mvp,v2);
+				v3 = multiplyMatrixWithVec4(Mvp,v3);
+				//end::ViewPort Transformation
+
+				raster (v1,v2);
+				raster (v2,v3);
+				raster (v3,v1);
+
+				if(slope(v1,v2)<=1 && slope(v1,v2)>=0 )//region 1-5
+				{
+					if(v1.x<v2.x) midpoint(v1,v2,1)
+					else midpoint(v2,v1,4);
+				}
+				if(slope(v1,v2)>-1 && slope(v1,v2)>0 )//region 4-8
+				{
+					if(v1.x<v2.x) midpoint(v1,v2,)
+					else midpoint2(v2,v1);
+				}
+				if(slope(v1,v2)>1 )//region 2-6
+				{
+					if(v1.x<v2.x) midpoint3(v1,v2)
+					else midpoint3(v2,v1);
+				}
+				if(slope(v1,v2)<-1 )//region 3-8
+				{
+					if(v1.x<v2.x) midpoint3(v1,v2)
+					else midpoint3(v2,v1);
+				}
+
+
+			}
 
 
 		}

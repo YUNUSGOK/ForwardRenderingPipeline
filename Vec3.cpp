@@ -27,6 +27,15 @@ Vec3::Vec3(const Vec3 &other)
     this->colorId = other.colorId;
 }
 
+Vec3::Vec3(const Vec4 &other)
+{
+    this->x = other.x;
+    this->y = other.y;
+    this->z = other.z;
+    this->colorId = other.colorId;
+}
+
+
 double Vec3::getElementAt(int index)
 {
     switch (index)
@@ -46,7 +55,7 @@ double Vec3::getElementAt(int index)
 }
 
 ostream& operator<<(ostream& os, const Vec3& v) {
-    
+
     os << fixed << setprecision(6) << "[" << v.x << ", " << v.y << ", " << v.z << "]";
 
     return os;
