@@ -222,16 +222,16 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 			{
 				Triangle tri = model->triangles[triNum];
 
-				Vec3 *vertex1  = vertices[tri.vertexIds[1]-1];
-				Vec3 *vertex2  = vertices[tri.vertexIds[2]-1];
-				Vec3 *vertex3  = vertices[tri.vertexIds[3]-1];
-				std::cout << "1" << '\n';
+				Vec3 *vertex1  = vertices[tri.vertexIds[0]-1];
+				Vec3 *vertex2  = vertices[tri.vertexIds[1]-1];
+				Vec3 *vertex3  = vertices[tri.vertexIds[2]-1];
+
 				Vec4 v1(vertex1->x,vertex1->y,vertex1->z,1,vertex1->colorId);
-				std::cout << v1 << '\n';
+
 				Vec4 v2(vertex2->x,vertex2->y,vertex2->z,1,vertex2->colorId);
-				std::cout << v2 << '\n';
+
 				Vec4 v3(vertex3->x,vertex3->y,vertex3->z,1,vertex3->colorId);
-				std::cout << "4" << '\n';
+		
 
 				/*
 
