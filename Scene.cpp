@@ -52,7 +52,8 @@ Matrix4 Scene::getMp2o(Camera *camera)
 {
 	double n = camera->near;
 	double f = camera->far;
-	double m[4][4] = {	{n, 0, 0, 0},
+	double m[4][4] = {
+							{n, 0, 0, 0},
 							{0, n, 0, 0},
 							{0, 0, f+n, f*n},
 							{0, 0, -1, 0}
@@ -63,11 +64,17 @@ Matrix4 Scene::getMp2o(Camera *camera)
 
 
 Matrix4 Scene::getMorth(Camera *camera){
+	double n = camera->near;
+	double f = camera->far;
+	double r = camera->right;
+	double l = camera->left;
+	double t = camera->top;
+	double b = camera->bottom;
 	double m[4][4]=
 	{
-		{2/(camera->right-camera->left),0,0, -(camera->right+camera->left)/(camera->right-camera->left)},
-		{0,2/(camera->top-camera->bottom),0, -(camera->top+camera->bottom)/(camera->top-camera->bottom)},
-		{0,0,-2/(camera->far-camera->near), -(camera->far+camera->near)/(camera->far-camera->near)},
+		{2/(r-l),0,0, -(r+l)/(r-l)},
+		{0,2/(t-b),0, -(t+b)/(t-b)},
+		{0,0,-2/(f-n), -(f+n)/(f-n)},
 		{0,0,0,1}
 	};
 	return Matrix4(m);
@@ -203,10 +210,14 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 		Matrix4 Mvp(getMvp(camera));
 		Matrix4 MOrth(getMorth(camera));
 		Matrix4 Mp2o(getIdentityMatrix());
+		std::cout << Mcam << "cam"<< '\n'<<'\n';
+		std::cout << Mvp << "mvp"<<'\n'<< '\n';
+		std::cout << MOrth <<"orth"<< '\n'<< '\n';
+		std::cout << Mp2o<<"p20" << '\n'<< '\n';
 		if(projectionType==1){
 			Mp2o=multiplyMatrixWithMatrix(Mp2o,getMp2o(camera));
 		}
-		std::cout <<endl<< Mcam <<"'Mcam'"<<endl<< '\n';
+;
 
 
 		for(int modelNum=0; modelNum<modelSize; modelNum++)
@@ -220,6 +231,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 			Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
 
 			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
+			std::cout << Mtotal << '\n';
 			triSize = model->numberOfTriangles;
 			for(int triNum=0; triNum<triSize ; triNum++ )
 			{
@@ -250,16 +262,16 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				v3 = multiplyVec4WithScalar(v3,1/v3.t);
 				//end::perspective divide
 
+				std::cout << v1 << '\n';
+				std::cout << v2 << '\n';
+				std::cout << v3 << '\n';
+				/*
 				//start::ViewPort Transformation
 				v1 = multiplyMatrixWithVec4(Mvp,v1);
 				v2 = multiplyMatrixWithVec4(Mvp,v2);
 				v3 = multiplyMatrixWithVec4(Mvp,v3);
 				//end::ViewPort Transformation
-				std::cout << v1 << '\n';
-				std::cout << v2 << '\n';
-				std::cout << v3 << '\n';
 
-				/*
 				if(model->type ==0)//wireframe
 				{
 					rasterline(v1,v2);
