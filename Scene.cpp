@@ -97,8 +97,8 @@ Matrix4 Scene::getTransMatrix(Translation *trans)
 	double t[4][4] = {
 						{1, 0, 0, trans->tx},
 						{0, 1, 0, trans->ty},
-						{0, 0, 1, trans->ty},
-						{0, 0, 0, 0}
+						{0, 0, 1, trans->tz},
+						{0, 0, 0, 1}
 					};
 
 	return Matrix4(t);
@@ -108,7 +108,7 @@ Matrix4 Scene::getScalingMatrix(Scaling* scale)
 {
 	double s[4][4] = {
 						{scale->sx, 0, 0, 0},
-						{0, scale->sx, 0, 0},
+						{0, scale->sy, 0, 0},
 						{0, 0, scale->sz, 0},
 						{0, 0, 0, 1}
 					};
@@ -119,9 +119,11 @@ Matrix4 Scene::getScalingMatrix(Scaling* scale)
 
 Matrix4 Scene::getRotMatrix(Rotation *rot)
 {
-	Vec3 u(rot->ux, rot->uy, rot->uz,-1);
-	Vec3 v(-rot->uy, rot->ux,0,-1);
+	Vec3 u(rot->ux, rot->uy, rot->uz, -1);
+	Vec3 v(-rot->uy, rot->ux, 0, -1);
 	Vec3 w(crossProductVec3(u, v));
+	v = normalizeVec3(v);
+	w = normalizeVec3(w);
 	double angle = rot->angle;
 	double r[4][4];
 	double M[4][4] = {
@@ -196,6 +198,8 @@ void Scene::rasterline(Vec4 &v1, Vec4 &v2 )
 
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
+		// Vec4 v(1,1,1,1,4);
+		// cout << multiplyVec4WithScalar(v, 4);
 
 		int modelSize =models.size();
 		int triSize;
@@ -210,10 +214,10 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 		Matrix4 Mvp(getMvp(camera));
 		Matrix4 MOrth(getMorth(camera));
 		Matrix4 Mp2o(getIdentityMatrix());
-		std::cout << Mcam << "cam"<< '\n'<<'\n';
-		std::cout << Mvp << "mvp"<<'\n'<< '\n';
-		std::cout << MOrth <<"orth"<< '\n'<< '\n';
-		std::cout << Mp2o<<"p20" << '\n'<< '\n';
+		// std::cout << Mcam << "cam"<< '\n'<<'\n';
+		// std::cout << Mvp << "mvp"<<'\n'<< '\n';
+		// std::cout << MOrth <<"orth"<< '\n'<< '\n';
+		// std::cout << Mp2o<<"p20" << '\n'<< '\n';
 		if(projectionType==1){
 			Mp2o=multiplyMatrixWithMatrix(Mp2o,getMp2o(camera));
 		}
@@ -231,7 +235,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 			Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
 
 			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
-			std::cout << Mtotal << '\n';
+			// std::cout << Mtotal << '\n';
 			triSize = model->numberOfTriangles;
 			for(int triNum=0; triNum<triSize ; triNum++ )
 			{
