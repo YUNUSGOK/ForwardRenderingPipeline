@@ -38,9 +38,9 @@ Matrix4 Scene::getMcam(Camera *camera) {
 		{0, 0, 0, 1},
 	};
 	double T[4][4]={
-		{0, 0, 0, -e.x},
-		{0, 0, 0, -e.y},
-		{0, 0, 0, -e.z},
+		{1, 0, 0, -e.x},
+		{0, 1, 0, -e.y},
+		{0, 0, 1, -e.z},
 		{0, 0, 0, 1}
 	};
 
@@ -206,17 +206,20 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 		if(projectionType==1){
 			Mp2o=multiplyMatrixWithMatrix(Mp2o,getMp2o(camera));
 		}
-
+		std::cout <<endl<< Mcam <<"'Mcam'"<<endl<< '\n';
 
 
 		for(int modelNum=0; modelNum<modelSize; modelNum++)
 		{
 			model = models[modelNum];
-			Mtotal = multiplyMatrixWithMatrix(getMmodel(model),Mtotal);
-			Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
-			Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
-			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
 
+			Mtotal = multiplyMatrixWithMatrix(getMmodel(model),Mtotal);
+
+			Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
+
+			Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
+
+			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
 			triSize = model->numberOfTriangles;
 			for(int triNum=0; triNum<triSize ; triNum++ )
 			{
@@ -231,20 +234,20 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				Vec4 v2(vertex2->x,vertex2->y,vertex2->z,1,vertex2->colorId);
 
 				Vec4 v3(vertex3->x,vertex3->y,vertex3->z,1,vertex3->colorId);
-		
 
-				/*
+
 
 				v1= multiplyMatrixWithVec4(Mtotal,v1);
 				v2= multiplyMatrixWithVec4(Mtotal,v2);
 				v3= multiplyMatrixWithVec4(Mtotal,v3);
+
 				//culling
 				//clipping
 
 				//start::perspective divide
 				v1 = multiplyVec4WithScalar(v1,1/v1.t);
-				v2 = multiplyVec4WithScalar(v2,1/v1.t);
-				v3 = multiplyVec4WithScalar(v3,1/v1.t);
+				v2 = multiplyVec4WithScalar(v2,1/v2.t);
+				v3 = multiplyVec4WithScalar(v3,1/v3.t);
 				//end::perspective divide
 
 				//start::ViewPort Transformation
@@ -252,7 +255,11 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				v2 = multiplyMatrixWithVec4(Mvp,v2);
 				v3 = multiplyMatrixWithVec4(Mvp,v3);
 				//end::ViewPort Transformation
+				std::cout << v1 << '\n';
+				std::cout << v2 << '\n';
+				std::cout << v3 << '\n';
 
+				/*
 				if(model->type ==0)//wireframe
 				{
 					rasterline(v1,v2);
