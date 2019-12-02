@@ -1,6 +1,7 @@
 #ifndef __VEC3_H__
 #define __VEC3_H__
 
+#include "Vec4.h"
 #include <iostream>
 using namespace std;
 
@@ -13,7 +14,7 @@ public:
     Vec3();
     Vec3(double x, double y, double z, int colorId);
     Vec3(const Vec3 &other);
-    Vec3(const Vec4 &other);
+
 
     double getElementAt(int index);
 

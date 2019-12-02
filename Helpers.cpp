@@ -25,7 +25,7 @@ double slope(Vec4 v1,Vec4 v2)
 {
   double dy = v2.y-v1.y;
   double dx = v2.x-v1.x;
-  if(dy==0) return 10;
+  if(dx==0) return 10 ;
   return dy/dx;
 }
 

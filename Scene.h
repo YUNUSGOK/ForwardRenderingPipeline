@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "Matrix4.h"
 #include "Camera.h"
 #include "Color.h"
 #include "Model.h"
@@ -44,14 +45,16 @@ public:
 	void writeImageToPPMFile(Camera* camera);
 	void convertPPMToPNG(string ppmFileName, int osType);
 
-	double** getMcam(Camera *camera);
-	double** getMp2o(Camera *camera);
-	double** getMorth(Camera *camera);
-	double** getMvp(Camera *camera);
-	Matrix4 getTransMatrix(Translation trans);
-	Matrix4 getScalingMatrix(Scaling scale);
-	Matrix4 getRotMatrix(Rotation rot);
-
+	Matrix4 getMmodel(Model * model);
+	Matrix4 getMcam(Camera *camera);
+	Matrix4 getMp2o(Camera *camera);
+	Matrix4 getMorth(Camera *camera);
+	Matrix4 getMvp(Camera *camera);
+	Matrix4 getTransMatrix(Translation *trans);
+	Matrix4 getScalingMatrix(Scaling *scale);
+	Matrix4 getRotMatrix(Rotation *rot);
+	void midpoint(Vec4 &v1, Vec4 &v2 );
+	void rasterline(Vec4 &v1, Vec4 &v2 );
 };
 
 #endif

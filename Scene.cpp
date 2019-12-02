@@ -29,86 +29,80 @@ Matrix4 Scene::getMcam(Camera *camera) {
 	Vec3 v = camera->v;
 	Vec3 w = camera->w;
 
-	Vec3 e = camera.pos;
+	Vec3 e = camera->pos;
 
-	double R[4][4];
-	double T[4][4];
-	Matrix4 Mcam;
-
-
-	R = {
+	double R[4][4] {
 		{u.x, u.y, u.z, 0},
 		{v.x, v.y, v.z, 0},
 		{w.x, w.y, w.z, 0},
 		{0, 0, 0, 1},
 	};
-
-	T = {
+	double T[4][4]={
 		{0, 0, 0, -e.x},
 		{0, 0, 0, -e.y},
 		{0, 0, 0, -e.z},
 		{0, 0, 0, 1}
 	};
 
-	Mcam = multiplyMatrixWithMatrix(Matrix4(R), Matrix4(T));
+	return multiplyMatrixWithMatrix(Matrix4(R), Matrix4(T));
 
-	return Mcam;
 }
 
-double** Scene::getMp2o(Camera *camera)
+Matrix4 Scene::getMp2o(Camera *camera)
 {
 	double n = camera->near;
 	double f = camera->far;
-	double Mp2o[4][4] = {	{n, 0, 0, 0},
+	double m[4][4] = {	{n, 0, 0, 0},
 							{0, n, 0, 0},
 							{0, 0, f+n, f*n},
 							{0, 0, -1, 0}
 						};
-	return Mp2o;
+	return Matrix4(m);
 }
 
 
 
-double** Scene::getMorth(Camera *camera){
+Matrix4 Scene::getMorth(Camera *camera){
 	double m[4][4]=
 	{
 		{2/(camera->right-camera->left),0,0, -(camera->right+camera->left)/(camera->right-camera->left)},
 		{0,2/(camera->top-camera->bottom),0, -(camera->top+camera->bottom)/(camera->top-camera->bottom)},
 		{0,0,-2/(camera->far-camera->near), -(camera->far+camera->near)/(camera->far-camera->near)},
 		{0,0,0,1}
-	}
-	return m;
+	};
+	return Matrix4(m);
 
 }
-double** Scene::getMvp(Camera *camera){
+Matrix4 Scene::getMvp(Camera *camera){
 	double m[4][4]=
 	{
-		{camera->horRes/2,0,0,(camera->horRes-1)/2	},
-		{0,camera->verRes/2,0,(camera->verRes-1)/2	},
+		{(float)(camera->horRes)/2,0,0,((float)(camera->horRes-1))/2	},
+		{0,(float)(camera->verRes)/2,0,(float)(camera->verRes-1)/2	},
 		{0,0,0.5,0.5},
 		{0,0,0,0}
 	};
+	return Matrix4(m);
 }
 
 
-Matrix4 Scene::getScalingMatrix(Scaling scale)
+Matrix4 Scene::getTransMatrix(Translation *trans)
 {
 	double t[4][4] = {
-						{1, 0, 0, trans.tx},
-						{0, 1, 0, trans.ty},
-						{0, 0, 1, trans.ty},
+						{1, 0, 0, trans->tx},
+						{0, 1, 0, trans->ty},
+						{0, 0, 1, trans->ty},
 						{0, 0, 0, 0}
 					};
 
 	return Matrix4(t);
 }
 
-Matrix4 Scene::getScalingMatrix(Scaling scale)
+Matrix4 Scene::getScalingMatrix(Scaling* scale)
 {
 	double s[4][4] = {
-						{scale.sx, 0, 0, 0},
-						{0, scale.sx, 0, 0},
-						{0, 0, scale.sz, 0},
+						{scale->sx, 0, 0, 0},
+						{0, scale->sx, 0, 0},
+						{0, 0, scale->sz, 0},
 						{0, 0, 0, 1}
 					};
 	return Matrix4(s);
@@ -116,12 +110,12 @@ Matrix4 Scene::getScalingMatrix(Scaling scale)
 }
 
 
-Matrix4 Scene::getRotMatrix(Rotation rot)
+Matrix4 Scene::getRotMatrix(Rotation *rot)
 {
-	Vec3 u = {rot.ux, rot.uy, rot.uz};
-	Vec3 v = {-rot.uy, rot.ux, 0};
-	vec3 w = crossProductVec3(u, v);
-	double angle = rot.angle;
+	Vec3 u(rot->ux, rot->uy, rot->uz,-1);
+	Vec3 v(-rot->uy, rot->ux,0,-1);
+	Vec3 w(crossProductVec3(u, v));
+	double angle = rot->angle;
 	double r[4][4];
 	double M[4][4] = {
 						{u.x, u.y, u.z, 0},
@@ -137,29 +131,60 @@ Matrix4 Scene::getRotMatrix(Rotation rot)
 							};
 	double Ra[4][4] = {
 						{1, 0, 0, 0},
-						{0, cos(angle*pi/180.0), -sin(angle*pi/180.0) , 0},
-						{0, sin(angle*pi/180.0), cos(angle*pi/180.0), 0},
+						{0, cos(angle*M_PI/180.0), -sin(angle*M_PI/180.0) , 0},
+						{0, sin(angle*M_PI/180.0), cos(angle*M_PI/180.0), 0},
 						{0, 0, 0, 1}
 					};
 
-	Matrix4 RaM = multiplyMatrixWithMatrix(Matrix4(Ra), Matrix4(M));
+	Matrix4 RaM(multiplyMatrixWithMatrix(Matrix4(Ra), Matrix4(M)));
 
-return multiplyMatrixWithMatrix(Matrix4(inverseM), RaM);
+	return multiplyMatrixWithMatrix(Matrix4(inverseM), RaM);
 }
 
 Matrix4 Scene::getMmodel(Model * model)
 {
-	Matrix4 Mmodel(getIdentityMatrix);
-	for(int i=0; model->numberOfTransformations ;i++)
+	Matrix4 Mmodel(getIdentityMatrix());
+	for(int i=0; i<model->numberOfTransformations ;i++)
 	{
-		if(transformationType[i]=='r')
-			Mmodel = multiplyMatrixWithMatrix(getRotationMatrix(rotations[transformationIds[i]-1]),Mmodel);
-		else if(transformationType[i]=='s')
-			Mmodel = multiplyMatrixWithMatrix(getScalingMatrix(scalings[transformationIds[i]-1]),Mmodel);
-		else if(transformationType[i]=='t')
-			Mmodel = multiplyMatrixWithMatrix(getTranslationMatrix(translations[transformationIds[i]-1]),Mmodel);
+		if(model->transformationTypes[i]=='r')
+			Mmodel = multiplyMatrixWithMatrix(getRotMatrix(rotations[model->transformationIds[i]-1]),Mmodel);
+		else if(model->transformationTypes[i]=='s')
+			Mmodel = multiplyMatrixWithMatrix(getScalingMatrix(scalings[model->transformationIds[i]-1]),Mmodel);
+		else if(model->transformationTypes[i]=='t')
+			Mmodel = multiplyMatrixWithMatrix(getTransMatrix(translations[model->transformationIds[i]-1]),Mmodel);
 	}
 	return Mmodel;
+}
+
+
+void Scene::midpoint(Vec4 &v1, Vec4 &v2 )
+{
+	int y = v1.y;
+	int d = 2*(v1.y-v2.y) + ( v2.x-v1.x);
+
+	for(int x=0; x<v2.x ; x++ )
+	{
+		image[x][y] = Color(0,0,0);
+		if(d<0)
+		{
+			y++;
+			d += 2*(v1.y-v2.y) + ( v2.x-v1.x);
+		}
+		else
+		{
+			d +=2*(v1.y-v2.y);
+		}
+	}
+}
+
+void Scene::rasterline(Vec4 &v1, Vec4 &v2 )
+{
+	if(v1.x<v2.x && v1.y<v2.y && slope(v1,v2)<1 && slope(v1,v2)>=0)
+	{
+		midpoint(v1,v2);
+	}
+
+
 }
 
 void Scene::forwardRenderingPipeline(Camera *camera)
@@ -172,19 +197,16 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 		vector<Matrix4> Mmodels;
 		int vertixSize = vertices.size();
 		vector< Vec3 > image_vertices;
-		for(int i=0; i< vertixSize; i++)
-		{
-			image_vertices.push_back(Vec4(vertices[i]->x,vertices[i]->y,vertices[i]->z,1,vertices[i]->colorId));
-		}
 
 
 		Matrix4 Mcam(getMcam(camera));
 		Matrix4 Mvp(getMvp(camera));
-		Matrix4 MOrth(getMOrth(camera));
-		if(projectionType==1)
-			Matrix4 Mp2o(getMp2o(camera));
-		else
-			Matrix4 Mp2o(getIdentityMatrix());
+		Matrix4 MOrth(getMorth(camera));
+		Matrix4 Mp2o(getIdentityMatrix());
+		if(projectionType==1){
+			Mp2o=multiplyMatrixWithMatrix(Mp2o,getMp2o(camera));
+		}
+
 
 
 		for(int modelNum=0; modelNum<modelSize; modelNum++)
@@ -194,18 +216,24 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 			Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
 			Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
 			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
-			triSize = model->triangles.size();
 
+			triSize = model->numberOfTriangles;
 			for(int triNum=0; triNum<triSize ; triNum++ )
 			{
 				Triangle tri = model->triangles[triNum];
-				Vec3 vertex1 = vertices[tri.getFirstVertexId()-1];
-				Vec3 vertex2 = vertices[tri.getSecondVertexId()-1];
-				Vec3 vertex3 = vertices[tri.getThirdVertexId()-1];
 
-				Vec4 v1(vertex1);
-				Vec4 v2(vertex2);
-				Vec4 v3(vertex3);
+				Vec3 *vertex1  = vertices[tri.vertexIds[1]-1];
+				Vec3 *vertex2  = vertices[tri.vertexIds[2]-1];
+				Vec3 *vertex3  = vertices[tri.vertexIds[3]-1];
+				std::cout << "1" << '\n';
+				Vec4 v1(vertex1->x,vertex1->y,vertex1->z,1,vertex1->colorId);
+				std::cout << v1 << '\n';
+				Vec4 v2(vertex2->x,vertex2->y,vertex2->z,1,vertex2->colorId);
+				std::cout << v2 << '\n';
+				Vec4 v3(vertex3->x,vertex3->y,vertex3->z,1,vertex3->colorId);
+				std::cout << "4" << '\n';
+
+				/*
 
 				v1= multiplyMatrixWithVec4(Mtotal,v1);
 				v2= multiplyMatrixWithVec4(Mtotal,v2);
@@ -225,37 +253,22 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				v3 = multiplyMatrixWithVec4(Mvp,v3);
 				//end::ViewPort Transformation
 
-				raster (v1,v2);
-				raster (v2,v3);
-				raster (v3,v1);
-
-				if(slope(v1,v2)<=1 && slope(v1,v2)>=0 )//region 1-5
+				if(model->type ==0)//wireframe
 				{
-					if(v1.x<v2.x) midpoint(v1,v2,1)
-					else midpoint(v2,v1,4);
-				}
-				if(slope(v1,v2)>-1 && slope(v1,v2)>0 )//region 4-8
-				{
-					if(v1.x<v2.x) midpoint(v1,v2,)
-					else midpoint2(v2,v1);
-				}
-				if(slope(v1,v2)>1 )//region 2-6
-				{
-					if(v1.x<v2.x) midpoint3(v1,v2)
-					else midpoint3(v2,v1);
-				}
-				if(slope(v1,v2)<-1 )//region 3-8
-				{
-					if(v1.x<v2.x) midpoint3(v1,v2)
-					else midpoint3(v2,v1);
+					rasterline(v1,v2);
+					rasterline(v2,v3);
+					rasterline(v3,v1);
 				}
 
 
+
+
+
+				*/
 			}
 
 
 		}
-
 
 
 
