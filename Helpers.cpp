@@ -4,6 +4,7 @@
 #include "Matrix4.h"
 #include "Vec3.h"
 #include "Vec4.h"
+#include <limits.h>
 
 using namespace std;
 
@@ -23,10 +24,14 @@ Vec3 crossProductVec3(Vec3 a, Vec3 b)
 
 double slope(Vec4 v1,Vec4 v2)
 {
-  double dy = v2.y-v1.y;
-  double dx = v2.x-v1.x;
-  if(dx==0) return 10 ;
-  return dy/dx;
+    double m;
+    double dy = v2.y -  v1.y;
+    double dx = v2.x - v1.x;
+    if (dx == 0)
+        m = INT_MAX;
+    else
+        m = dy/dx;
+    return m;
 }
 
 /*
