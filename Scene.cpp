@@ -157,8 +157,10 @@ Matrix4 Scene::getMmodel(Model * model)
 	{
 		if(model->transformationTypes[i]=='r')
 			Mmodel = multiplyMatrixWithMatrix(getRotMatrix(rotations[model->transformationIds[i]-1]),Mmodel);
+
 		else if(model->transformationTypes[i]=='s')
 			Mmodel = multiplyMatrixWithMatrix(getScalingMatrix(scalings[model->transformationIds[i]-1]),Mmodel);
+
 		else if(model->transformationTypes[i]=='t')
 			Mmodel = multiplyMatrixWithMatrix(getTransMatrix(translations[model->transformationIds[i]-1]),Mmodel);
 	}
@@ -166,18 +168,18 @@ Matrix4 Scene::getMmodel(Model * model)
 }
 
 
-void Scene::midpoint(Vec4 &v1, Vec4 &v2 )
+void Scene::midpoint1(Vec4 &v1, Vec4 &v2 )
 {
 	int y = v1.y;
 	int d = 2*(v1.y-v2.y) + ( v2.x-v1.x);
 
-	for(int x=0; x<v2.x ; x++ )
+	for(int x=v1.x; x<v2.x ; x++ )
 	{
 		image[x][y] = Color(0,0,0);
 		if(d<0)
 		{
 			y++;
-			d += 2*(v1.y-v2.y) + ( v2.x-v1.x);
+			d += 2*(v1.y-v2.y) + 2*( v2.x-v1.x);
 		}
 		else
 		{
@@ -186,11 +188,113 @@ void Scene::midpoint(Vec4 &v1, Vec4 &v2 )
 	}
 }
 
+
+void Scene::midpoint2(Vec4 &v1, Vec4 &v2 )
+{
+	int x = v1.x;
+	int d = 2*(v1.x-v2.x) + ( v2.y-v1.y);
+
+
+	for(int y=v1.y; y<v2.y ; y++ )
+	{
+		image[x][y] = Color(0,0,0);
+
+
+		if(d<0)
+		{
+			x++;
+			d += 2*(v1.x-v2.x) + 2*( v2.y-v1.y);
+		}
+		else
+		{
+			d +=2*(v1.x-v2.x);
+		}
+
+	}
+
+}
+
+
+
+void Scene::midpoint3(Vec4 &v1, Vec4 &v2 )
+{
+	int y = v1.y ;
+	int d = 2*(v1.y-v2.y) - ( v2.x-v1.x);
+
+
+	for(int x=v1.x; x<v2.x ; x-- )
+	{
+		image[x][y] = Color(0,0,0);
+
+
+		if(d<0)
+		{
+			y++;
+			d += 2*(v2.x-v1.x) + 2*( v1.y-v2.y);
+		}
+		else
+		{
+			d +=2*(v1.y-v2.y);
+		}
+
+	}
+}
+
+void Scene::midpoint4(Vec4 &v1, Vec4 &v2 )
+{
+	int x = v1.x ;
+	int d = 2*(v1.x-v2.x) - ( v2.y-v1.y);
+
+
+	for(int y=v1.y; y<v2.y ; y++ )
+	{
+		image[x][y] = Color(0,0,0);
+
+
+		if(d<0)
+		{
+			x--;
+			d += 2*(v2.y-v1.y) + 2*( v1.x-v2.x);
+		}
+		else
+		{
+			d +=2*(v1.x-v2.x);
+		}
+
+	}
+}
+
+
+
 void Scene::rasterline(Vec4 &v1, Vec4 &v2 )
 {
-	if(v1.x<v2.x && v1.y<v2.y && slope(v1,v2)<1 && slope(v1,v2)>=0)
+	if(slope(v1,v2)<=1 && slope(v1,v2)>=0)
 	{
-		midpoint(v1,v2);
+		if(v1.x< v2.x)
+		midpoint1(v1,v2);
+		else midpoint1(v2,v1);
+	}
+
+	if( slope(v1,v2)>1)
+	{
+		if(v1.x>v2.x)
+		midpoint2(v1,v2);
+		else
+		midpoint2(v2,v1);
+	}
+	if( slope(v1,v2)>-1 && slope(v1,v2)<0)
+	{
+		if(v1.x>v2.x)
+		midpoint3(v1,v2);
+		else
+		midpoint3(v2,v1);
+	}
+	if( slope(v1,v2)<-1)
+	{
+		if(v2.y > v1.y)
+		midpoint4(v1,v2);
+		else
+		midpoint4(v2,v1);
 	}
 
 
@@ -198,26 +302,18 @@ void Scene::rasterline(Vec4 &v1, Vec4 &v2 )
 
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
-		// Vec4 v(1,1,1,1,4);
-		// cout << multiplyVec4WithScalar(v, 4);
+
 
 		int modelSize =models.size();
 		int triSize;
 		Model *model;
 		Matrix4 Mtotal(getIdentityMatrix());
-		vector<Matrix4> Mmodels;
-		int vertixSize = vertices.size();
-		vector< Vec3 > image_vertices;
-
 
 		Matrix4 Mcam(getMcam(camera));
 		Matrix4 Mvp(getMvp(camera));
 		Matrix4 MOrth(getMorth(camera));
 		Matrix4 Mp2o(getIdentityMatrix());
-		// std::cout << Mcam << "cam"<< '\n'<<'\n';
-		// std::cout << Mvp << "mvp"<<'\n'<< '\n';
-		// std::cout << MOrth <<"orth"<< '\n'<< '\n';
-		// std::cout << Mp2o<<"p20" << '\n'<< '\n';
+
 		if(projectionType==1){
 			Mp2o=multiplyMatrixWithMatrix(Mp2o,getMp2o(camera));
 		}
@@ -245,11 +341,11 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				Vec3 *vertex2  = vertices[tri.vertexIds[1]-1];
 				Vec3 *vertex3  = vertices[tri.vertexIds[2]-1];
 
-				Vec4 v1(vertex1->x,vertex1->y,vertex1->z,1,vertex1->colorId);
+				Vec4 v1(vertex1->x, vertex1->y, vertex1->z, 1, vertex1->colorId);
 
-				Vec4 v2(vertex2->x,vertex2->y,vertex2->z,1,vertex2->colorId);
+				Vec4 v2(vertex2->x, vertex2->y, vertex2->z, 1, vertex2->colorId);
 
-				Vec4 v3(vertex3->x,vertex3->y,vertex3->z,1,vertex3->colorId);
+				Vec4 v3(vertex3->x, vertex3->y, vertex3->z, 1, vertex3->colorId);
 
 
 
@@ -266,10 +362,6 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				v3 = multiplyVec4WithScalar(v3,1/v3.t);
 				//end::perspective divide
 
-				std::cout << v1 << '\n';
-				std::cout << v2 << '\n';
-				std::cout << v3 << '\n';
-				/*
 				//start::ViewPort Transformation
 				v1 = multiplyMatrixWithVec4(Mvp,v1);
 				v2 = multiplyMatrixWithVec4(Mvp,v2);
@@ -283,6 +375,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 					rasterline(v3,v1);
 				}
 
+				/*
 
 
 

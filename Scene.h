@@ -53,7 +53,10 @@ public:
 	Matrix4 getTransMatrix(Translation *trans);
 	Matrix4 getScalingMatrix(Scaling *scale);
 	Matrix4 getRotMatrix(Rotation *rot);
-	void midpoint(Vec4 &v1, Vec4 &v2 );
+	void midpoint1(Vec4 &v1, Vec4 &v2 );
+	void midpoint2(Vec4 &v1, Vec4 &v2 );
+	void midpoint3(Vec4 &v1, Vec4 &v2 );
+	void midpoint4(Vec4 &v1, Vec4 &v2 );
 	void rasterline(Vec4 &v1, Vec4 &v2 );
 };
 
