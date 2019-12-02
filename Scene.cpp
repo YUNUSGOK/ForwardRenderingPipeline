@@ -173,7 +173,7 @@ void Scene::midpoint1(Vec4 &v1, Vec4 &v2 )
 	int y = v1.y;
 	int d = 2*(v1.y-v2.y) + ( v2.x-v1.x);
 
-	for(int x=v1.x; x<v2.x ; x++ )
+	for(int x=v1.x; x<=v2.x ; x++ )
 	{
 		image[x][y] = Color(0,0,0);
 		if(d<0)
@@ -194,12 +194,9 @@ void Scene::midpoint2(Vec4 &v1, Vec4 &v2 )
 	int x = v1.x;
 	int d = 2*(v1.x-v2.x) + ( v2.y-v1.y);
 
-
-	for(int y=v1.y; y<v2.y ; y++ )
+	for(int y=v1.y; y<=v2.y ; y++ )
 	{
 		image[x][y] = Color(0,0,0);
-
-
 		if(d<0)
 		{
 			x++;
@@ -209,7 +206,6 @@ void Scene::midpoint2(Vec4 &v1, Vec4 &v2 )
 		{
 			d +=2*(v1.x-v2.x);
 		}
-
 	}
 
 }
@@ -218,50 +214,48 @@ void Scene::midpoint2(Vec4 &v1, Vec4 &v2 )
 
 void Scene::midpoint3(Vec4 &v1, Vec4 &v2 )
 {
-	int y = v1.y ;
-	int d = 2*(v1.y-v2.y) - ( v2.x-v1.x);
-
-
-	for(int x=v1.x; x<v2.x ; x-- )
+	int y = v2.y;
+	int dx = v1.x-v2.x ;
+	int dy = v2.y-v1.y ;
+	int d = 2*dy -dx;
+	for(int x=v2.x; x<v1.x ; x++ )
 	{
 		image[x][y] = Color(0,0,0);
-
-
-		if(d<0)
+		if(d<=0)
 		{
-			y++;
-			d += 2*(v2.x-v1.x) + 2*( v1.y-v2.y);
+
+			d +=2*dy;
 		}
 		else
 		{
-			d +=2*(v1.y-v2.y);
+			d += 2*(dy-dx);
+			y-=1;
 		}
-
 	}
+
 }
 
 void Scene::midpoint4(Vec4 &v1, Vec4 &v2 )
 {
-	int x = v1.x ;
-	int d = 2*(v1.x-v2.x) - ( v2.y-v1.y);
-
-
+	int x = v1.x;
+	int dx = v1.x-v2.x ;
+	int dy = v2.y-v1.y ;
+	int d = 2*dx -dy;
 	for(int y=v1.y; y<v2.y ; y++ )
 	{
 		image[x][y] = Color(0,0,0);
-
-
-		if(d<0)
+		if(d<=0)
 		{
-			x--;
-			d += 2*(v2.y-v1.y) + 2*( v1.x-v2.x);
+
+			d +=2*dx;
 		}
 		else
 		{
-			d +=2*(v1.x-v2.x);
+			d += 2*(dx-dy);
+			x-=1;
 		}
-
 	}
+   
 }
 
 
@@ -277,7 +271,7 @@ void Scene::rasterline(Vec4 &v1, Vec4 &v2 )
 
 	if( slope(v1,v2)>1)
 	{
-		if(v1.x>v2.x)
+		if(v1.x<v2.x)
 		midpoint2(v1,v2);
 		else
 		midpoint2(v2,v1);
