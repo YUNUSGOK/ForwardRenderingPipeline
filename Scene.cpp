@@ -171,11 +171,18 @@ Matrix4 Scene::getMmodel(Model * model)
 void Scene::midpoint1(Vec4 &v1, Vec4 &v2 )
 {
 	int y = v1.y;
-	int d = 2*(v1.y-v2.y) + ( v2.x-v1.x);
+	int dx = v2.x-v1.x ;
+	int dy = (v1.y-v2.y);
+	int d = 2*dy + dx;
+	Color c1 = *colorsOfVertices[v1.colorId-1];
+	Color c2 = *colorsOfVertices[v2.colorId-1];
+	Color c = c1;
+	Color deltaC = (c2-c1)/dx;
+
 
 	for(int x=v1.x; x<=v2.x ; x++ )
 	{
-		image[x][y] = Color(0,0,0);
+		image[x][y] = c.clippedColor();
 		if(d<0)
 		{
 			y++;
@@ -185,18 +192,27 @@ void Scene::midpoint1(Vec4 &v1, Vec4 &v2 )
 		{
 			d +=2*(v1.y-v2.y);
 		}
+		c = c+ deltaC;
 	}
 }
 
 
 void Scene::midpoint2(Vec4 &v1, Vec4 &v2 )
 {
+
 	int x = v1.x;
-	int d = 2*(v1.x-v2.x) + ( v2.y-v1.y);
+	int dx = v1.x-v2.x ;
+	int dy = (v2.y-v1.y);
+	int d = 2*dx + dy;
+	Color c1 = *colorsOfVertices[v1.colorId-1];
+	Color c2 = *colorsOfVertices[v2.colorId-1];
+	Color c = c1;
+	Color deltaC = (c2-c1)/dy;
+
 
 	for(int y=v1.y; y<=v2.y ; y++ )
 	{
-		image[x][y] = Color(0,0,0);
+		image[x][y] = c.clippedColor();
 		if(d<0)
 		{
 			x++;
@@ -206,6 +222,7 @@ void Scene::midpoint2(Vec4 &v1, Vec4 &v2 )
 		{
 			d +=2*(v1.x-v2.x);
 		}
+		c= c+ deltaC;
 	}
 
 }
@@ -214,13 +231,20 @@ void Scene::midpoint2(Vec4 &v1, Vec4 &v2 )
 
 void Scene::midpoint3(Vec4 &v1, Vec4 &v2 )
 {
+
 	int y = v2.y;
 	int dx = v1.x-v2.x ;
 	int dy = v2.y-v1.y ;
 	int d = 2*dy -dx;
+
+	Color c1 = *colorsOfVertices[v1.colorId-1];
+	Color c2 = *colorsOfVertices[v2.colorId-1];
+	Color c = c2;
+	Color deltaC = (c1-c2)/(dx);
+
 	for(int x=v2.x; x<v1.x ; x++ )
 	{
-		image[x][y] = Color(0,0,0);
+		image[x][y] = c.clippedColor();
 		if(d<=0)
 		{
 
@@ -231,6 +255,7 @@ void Scene::midpoint3(Vec4 &v1, Vec4 &v2 )
 			d += 2*(dy-dx);
 			y-=1;
 		}
+		c = c+deltaC;
 	}
 
 }
@@ -241,9 +266,15 @@ void Scene::midpoint4(Vec4 &v1, Vec4 &v2 )
 	int dx = v1.x-v2.x ;
 	int dy = v2.y-v1.y ;
 	int d = 2*dx -dy;
+
+	Color c1 = *colorsOfVertices[v1.colorId-1];
+	Color c2 = *colorsOfVertices[v2.colorId-1];
+	Color c = c1;
+	Color deltaC = (c2-c1)/(dy);
+
 	for(int y=v1.y; y<v2.y ; y++ )
 	{
-		image[x][y] = Color(0,0,0);
+		image[x][y] = c.clippedColor();
 		if(d<=0)
 		{
 
@@ -254,8 +285,9 @@ void Scene::midpoint4(Vec4 &v1, Vec4 &v2 )
 			d += 2*(dx-dy);
 			x-=1;
 		}
+		c= c+deltaC;
 	}
-   
+
 }
 
 
@@ -334,7 +366,6 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				Vec3 *vertex1  = vertices[tri.vertexIds[0]-1];
 				Vec3 *vertex2  = vertices[tri.vertexIds[1]-1];
 				Vec3 *vertex3  = vertices[tri.vertexIds[2]-1];
-
 				Vec4 v1(vertex1->x, vertex1->y, vertex1->z, 1, vertex1->colorId);
 
 				Vec4 v2(vertex2->x, vertex2->y, vertex2->z, 1, vertex2->colorId);
@@ -357,9 +388,11 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				//end::perspective divide
 
 				//start::ViewPort Transformation
+
 				v1 = multiplyMatrixWithVec4(Mvp,v1);
 				v2 = multiplyMatrixWithVec4(Mvp,v2);
 				v3 = multiplyMatrixWithVec4(Mvp,v3);
+
 				//end::ViewPort Transformation
 
 				if(model->type ==0)//wireframe

@@ -125,7 +125,7 @@ Vec4 multiplyVec4WithScalar(Vec4 v, double c)
     result.y = v.y * c;
     result.z = v.z * c;
     result.t = v.t *c ;
-
+    result.colorId = v.colorId;
     return result;
 }
 

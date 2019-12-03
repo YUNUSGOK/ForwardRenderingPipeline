@@ -25,3 +25,27 @@ ostream& operator<<(ostream& os, const Color& c)
     os << fixed << setprecision(0) << "rgb(" << c.r << ", " << c.g << ", " << c.b << ")";
     return os;
 }
+Color Color::operator+(Color &other){
+  Color c(r+other.r,g+other.g,b+other.b);
+  return c;
+}
+
+Color Color::operator-(Color &other){
+  Color c(r-other.r,g-other.g,b-other.b);
+  return c;
+}
+
+Color Color::operator*(double delta)
+{
+  Color c(r*delta,g*delta,b*delta);
+  return c;
+}
+Color Color::operator/(double delta)
+{
+  Color c(r/delta,g/delta,b/delta);
+  return c;
+}
+Color Color::clippedColor(){
+  Color c((int)(r),(int)(g),(int)(b));
+  return c;
+}
