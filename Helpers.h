@@ -13,6 +13,13 @@
  */
 Vec3 crossProductVec3(Vec3 a, Vec3 b);
 
+
+double threemin(double &a,double &b, double &c);
+
+
+double threemax(double &a,double &b, double &c);
+
+double lineEq(double x,double y, Vec4 &v1,Vec4 &v2);
 /*
  * Calculate dot product of vec3 a, vec3 b and return resulting value.
  */

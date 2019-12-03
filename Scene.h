@@ -58,6 +58,8 @@ public:
 	void midpoint3(Vec4 &v1, Vec4 &v2 );
 	void midpoint4(Vec4 &v1, Vec4 &v2 );
 	void rasterline(Vec4 &v1, Vec4 &v2 );
+	void rastertriangle(Vec4 &v0,Vec4 &v1,Vec4 &v2 );
+	bool backFaceCulling(Vec4 &v1, Vec4 &v2,Vec4 &v3,Vec3 e);
 };
 
 #endif

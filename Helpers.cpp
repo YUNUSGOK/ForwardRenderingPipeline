@@ -21,6 +21,42 @@ Vec3 crossProductVec3(Vec3 a, Vec3 b)
 
     return result;
 }
+double threemin(double &a,double &b, double &c){
+
+  double m = a;
+
+   if (a > b)
+   {
+       m = b;
+   }
+
+   if (m > c)
+   {
+     m = c;
+   }
+   return m;
+}
+
+
+double threemax(double &a,double &b, double &c){
+
+  double m = a;
+
+   if (a < b)
+   {
+       m = b;
+   }
+
+   if (m < c)
+   {
+     m = c;
+   }
+   return m;
+}
+
+double lineEq(double x,double y, Vec4 &v0,Vec4 &v1){
+  return  x*(v0.y-v1.y)+y*(v1.x-v0.x) +v0.x*v1.y -v0.y*v1.x;
+}
 
 double slope(Vec4 v1,Vec4 v2)
 {

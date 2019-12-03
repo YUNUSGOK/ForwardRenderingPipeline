@@ -326,6 +326,49 @@ void Scene::rasterline(Vec4 &v1, Vec4 &v2 )
 
 }
 
+
+void Scene::rastertriangle(Vec4 &v0,Vec4 &v1,Vec4 &v2 )
+{
+	double a,b,c;
+	double ymin = threemin(v0.y, v1.y, v2.y);
+	double ymax = threemax(v0.y, v1.y, v2.y);
+	double xmin = threemin(v0.x, v1.x, v2.x);
+	double xmax = threemax(v0.x, v1.x, v2.x);
+
+	Color c0( *colorsOfVertices[v0.colorId-1]);
+	Color c1( *colorsOfVertices[v1.colorId-1]);
+	Color c2( *colorsOfVertices[v2.colorId-1]);
+	Color cres;
+
+	for(int i=xmin; i<xmax; i++)
+	{
+		for(int j = ymin ; j<ymax ; j++)
+		{
+			a = lineEq(i,j,v1,v2)/lineEq(v0.x,v0.y,v1,v2);
+			b = lineEq(i,j,v2,v0)/lineEq(v1.x,v1.y,v2,v0);
+			c = lineEq(i,j,v0,v1)/lineEq(v2.x,v2.y,v0,v1);
+			if(a>=0 &&b>=0 &&c>=0 )
+			{
+
+				cres = c0*a+c1*b+c2*c;
+				image[i][j] = cres.clippedColor();
+			}
+		}
+	}
+
+
+}
+
+bool Scene::backFaceCulling(Vec4 &v0, Vec4 &v1,Vec4 &v2,Vec3 e)
+{
+	Vec3 p0(v0.x,v0.y,v0.z,v0.colorId);
+	Vec3 p1(v1.x,v1.y,v1.z,v1.colorId);
+	Vec3 p2(v2.x,v2.y,v2.z,v2.colorId);
+
+	Vec3 n = crossProductVec3(subtractVec3(p2,p1),subtractVec3(p0,p1));
+	return 0 > dotProductVec3(n,subtractVec3(p1,e));
+}
+
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
 
@@ -395,11 +438,22 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 
 				//end::ViewPort Transformation
 
+				if(cullingEnabled ==1)
+				{
+					if(backFaceCulling(v1,v2,v3,camera->pos))
+					continue;
+				}
 				if(model->type ==0)//wireframe
 				{
 					rasterline(v1,v2);
 					rasterline(v2,v3);
 					rasterline(v3,v1);
+				}
+				if(model->type ==1)//solid
+				{
+
+					rastertriangle(v1,v2,v3);
+
 				}
 
 				/*
