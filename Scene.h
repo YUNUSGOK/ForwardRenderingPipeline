@@ -60,6 +60,8 @@ public:
 	void rasterline(Vec4 &v1, Vec4 &v2 );
 	void rastertriangle(Vec4 &v0,Vec4 &v1,Vec4 &v2 );
 	bool backFaceCulling(Vec4 &v1, Vec4 &v2,Vec4 &v3,Vec3 e);
+	void clipping(Vec4 &v0, Vec4 & v1, Camera *camera);
+	bool visible(double delta,double num, double & te, double & tl);
 };
 
 #endif

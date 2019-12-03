@@ -272,7 +272,7 @@ void Scene::midpoint4(Vec4 &v1, Vec4 &v2 )
 	Color c = c1;
 	Color deltaC = (c2-c1)/(dy);
 
-	for(int y=v1.y; y<v2.y ; y++ )
+	for(int y=v1.y; y<v2.y   ; y++ )
 	{
 		image[x][y] = c.clippedColor();
 		if(d<=0)
@@ -369,14 +369,67 @@ bool Scene::backFaceCulling(Vec4 &v0, Vec4 &v1,Vec4 &v2,Vec3 e)
 	return 0 > dotProductVec3(n,subtractVec3(p1,e));
 }
 
+
+bool Scene::visible(double den,double num, double & te, double & tl)
+{
+	double t;
+	if(den>0.0f)//potentially entering
+	{
+		t==  num/den;
+		if(t>tl) return false;
+		if(t>te) te = t;
+	}
+	else if(den<0.0f)//potentially leaving
+	{
+
+		t==  num/den;
+		if(t<te) return false;
+		if(t<tl) tl = t;
+	}
+	else if(num>0.0f) return false;
+	return true;
+
+}
+
+
+void Scene::clipping(Vec4 &v0, Vec4 &v1, Camera *camera)
+{
+	double dx = v1.x-v0.x;
+	double dy = v1.y-v0.y;
+	double dz = v1.z-v0.z;
+
+	double te= 0.0f;
+	double tl = 1.0f;
+
+	if(visible(dx,camera->left-v0.x,te,tl))
+	if(visible(-dx,v0.x-camera->right,te,tl))
+	if(visible(dy,camera->bottom-v0.y,te,tl))
+	if(visible(-dy,v0.y-camera->top,te,tl))
+
+	{
+		if(tl<1.0f)
+		{
+			v1.x = v0.x +dx*tl;
+			v1.y = v0.y +dy*tl;
+
+		}
+		if(te>0.0f)
+		 {
+			 v0.x = v0.x +dx*te;
+			 v0.y = v0.y +dy*te;
+
+		 }
+
+	}
+}
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
 
 
 		int modelSize =models.size();
+
 		int triSize;
 		Model *model;
-		Matrix4 Mtotal(getIdentityMatrix());
 
 		Matrix4 Mcam(getMcam(camera));
 		Matrix4 Mvp(getMvp(camera));
@@ -391,6 +444,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 
 		for(int modelNum=0; modelNum<modelSize; modelNum++)
 		{
+			Matrix4 Mtotal(getIdentityMatrix());
 			model = models[modelNum];
 
 			Mtotal = multiplyMatrixWithMatrix(getMmodel(model),Mtotal);
@@ -438,16 +492,23 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 
 				//end::ViewPort Transformation
 
-				if(cullingEnabled ==1)
+				if(cullingEnabled == 1)
 				{
-					if(backFaceCulling(v1,v2,v3,camera->pos))
-					continue;
+					if(backFaceCulling(v1,v2,v3,camera->pos)){
+					continue;}
 				}
 				if(model->type ==0)//wireframe
 				{
-					rasterline(v1,v2);
-					rasterline(v2,v3);
-					rasterline(v3,v1);
+					Vec4 v1copy(v1);
+					Vec4 v2copy(v2);
+					Vec4 v3copy(v3);
+
+					clipping(v1,v2copy,camera);
+					clipping(v2,v3copy,camera);
+					clipping(v3,v1copy,camera);
+					rasterline(v1,v2copy);
+					rasterline(v2,v3copy);
+					rasterline(v3,v1copy);
 				}
 				if(model->type ==1)//solid
 				{
