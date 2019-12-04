@@ -375,14 +375,14 @@ bool Scene::visible(double den,double num, double & te, double & tl)
 	double t;
 	if(den>0.0f)//potentially entering
 	{
-		t==  num/den;
+		t =  num/den;
 		if(t>tl) return false;
 		if(t>te) te = t;
 	}
 	else if(den<0.0f)//potentially leaving
 	{
 
-		t==  num/den;
+		t =  num/den;
 		if(t<te) return false;
 		if(t<tl) tl = t;
 	}
