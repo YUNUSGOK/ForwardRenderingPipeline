@@ -439,7 +439,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 		if(projectionType==1){
 			Mp2o=multiplyMatrixWithMatrix(Mp2o,getMp2o(camera));
 		}
-;
+
 
 
 		for(int modelNum=0; modelNum<modelSize; modelNum++)
