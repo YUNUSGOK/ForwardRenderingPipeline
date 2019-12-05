@@ -421,7 +421,7 @@ bool Scene::clipping(Vec4 &v0, Vec4 &v1, Camera *camera)
 	double tl = 1.0f;
 	Color c0 = *colorsOfVertices[v0.colorId-1];
 	Color c1 = *colorsOfVertices[v1.colorId-1];
-	Color deltaC = (c2-c1)/(dx);
+	Color deltaC = (c1-c0)/(dx);
 	if(visible(dx,xmin-v0.x,te,tl))
 	if(visible(-dx,v0.x-xmax,te,tl))
 	if(visible(dy,ymin-v0.y,te,tl))
