@@ -125,7 +125,7 @@ Matrix4 Scene::getRotMatrix(Rotation *rot)
 
 	v = normalizeVec3(v);
 	w = normalizeVec3(w);
-	
+
 	double angle = rot->angle;
 	double r[4][4];
 	double M[4][4] = {
@@ -388,14 +388,14 @@ bool Scene::visible(double den,double num, double & te, double & tl)
 	double t;
 	if(den>0.0f)//potentially entering
 	{
-		t==  num/den;
+		t =  num/den;
 		if(t>tl) return false;
 		if(t>te) te = t;
 	}
 	else if(den<0.0f)//potentially leaving
 	{
 
-		t==  num/den;
+		t =  num/den;
 		if(t<te) return false;
 		if(t<tl) tl = t;
 	}
@@ -453,6 +453,8 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 		if(projectionType==1){
 			Mp2o=multiplyMatrixWithMatrix(Mp2o,getMp2o(camera));
 		}
+
+
 
 		Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
 		Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
