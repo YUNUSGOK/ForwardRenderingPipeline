@@ -162,7 +162,7 @@ Matrix4 Scene::getMmodel(Model * model)
 		{
 
 			Mmodel = multiplyMatrixWithMatrix(getRotMatrix(rotations[model->transformationIds[i]-1]),Mmodel);
-		std::cout<< endl<<*rotations[model->transformationIds[i]-1]<<"rotation"<<  '\n';
+
 		}
 
 		else if(model->transformationTypes[i]=='s')
