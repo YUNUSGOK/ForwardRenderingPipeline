@@ -405,35 +405,57 @@ bool Scene::visible(double den,double num, double & te, double & tl)
 }
 
 
-void Scene::clipping(Vec4 &v0, Vec4 &v1, Camera *camera)
+bool Scene::clipping(Vec4 &v0, Vec4 &v1, Camera *camera)
 {
 	double dx = v1.x-v0.x;
 	double dy = v1.y-v0.y;
 	double dz = v1.z-v0.z;
-
+	double xmin = -0.5;
+	double xmax = camera->horRes-0.5;
+	double ymin = -0.5;
+	double ymax = camera->verRes-0.5;
+	bool vis = false;
+	double zmin = 0.00;
+	double zmax = 1.00;
 	double te= 0.0f;
 	double tl = 1.0f;
+	Color c0 = *colorsOfVertices[v0.colorId-1];
+	Color c1 = *colorsOfVertices[v1.colorId-1];
+	Color deltaC = (c2-c1)/(dx);
+	if(visible(dx,xmin-v0.x,te,tl))
+	if(visible(-dx,v0.x-xmax,te,tl))
+	if(visible(dy,ymin-v0.y,te,tl))
+	if(visible(-dy,v0.y-ymax,te,tl))
 
-	if(visible(dx,camera->left-v0.x,te,tl))
-	if(visible(-dx,v0.x-camera->right,te,tl))
-	if(visible(dy,camera->bottom-v0.y,te,tl))
-	if(visible(-dy,v0.y-camera->top,te,tl))
+
 
 	{
+		vis = true;
 		if(tl<1.0f)
 		{
 			v1.x = v0.x +dx*tl;
 			v1.y = v0.y +dy*tl;
+			v1.z = v0.z +dz*tl;
+
+			Color c1 = c0 + deltaC*tl;
+
 
 		}
 		if(te>0.0f)
 		 {
 			 v0.x = v0.x +dx*te;
 			 v0.y = v0.y +dy*te;
+			 v0.z = v0.z +dy*te;
+			 Color c0 = c0 + deltaC*te;
+
 
 		 }
 
+
 	}
+
+	return vis;
+
 }
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
@@ -490,6 +512,8 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				//culling
 				//clipping
 
+
+
 				//start::perspective divide
 				v1 = multiplyVec4WithScalar(v1,1/v1.t);
 				v2 = multiplyVec4WithScalar(v2,1/v2.t);
@@ -501,6 +525,8 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				v1 = multiplyMatrixWithVec4(Mvp,v1);
 				v2 = multiplyMatrixWithVec4(Mvp,v2);
 				v3 = multiplyMatrixWithVec4(Mvp,v3);
+
+
 
 				//end::ViewPort Transformation
 
@@ -515,12 +541,13 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 					Vec4 v2copy(v2);
 					Vec4 v3copy(v3);
 
-					clipping(v1,v2copy,camera);
-					clipping(v2,v3copy,camera);
-					clipping(v3,v1copy,camera);
+					if(clipping(v1,v2copy,camera))
 					rasterline(v1,v2copy);
+					if(clipping(v2,v3copy,camera))
 					rasterline(v2,v3copy);
+					if(clipping(v3,v1copy,camera))
 					rasterline(v3,v1copy);
+
 				}
 				if(model->type ==1)//solid
 				{
@@ -529,12 +556,6 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 
 				}
 
-				/*
-
-
-
-
-				*/
 			}
 
 
@@ -631,6 +652,7 @@ Scene::Scene(const char *xmlPath)
 
 		str = pVertex->Attribute("position");
 		sscanf(str, "%lf %lf %lf", &vertex->x, &vertex->y, &vertex->z);
+
 
 		str = pVertex->Attribute("color");
 		sscanf(str, "%lf %lf %lf", &color->r, &color->g, &color->b);
