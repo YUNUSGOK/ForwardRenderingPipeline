@@ -53,6 +53,31 @@ double threemax(double &a,double &b, double &c){
    }
    return m;
 }
+Vec3 getV(Vec3 u)
+{
+  Vec3 res;
+  double m = threemin(u.x,u.y,u.z);
+  if(m == u.x )
+  {
+    res.x= 0;
+    res.y = u.z;
+    res.z = -u.y;
+  }
+  if(m == u.y )
+  {
+    res.x= u.z;
+    res.y = 0;
+    res.z = -u.x;
+  }
+  if(m == u.z )
+  {
+    res.x= u.y;
+    res.y = -u.x;
+    res.z = 0;
+  }
+  return res;
+
+}
 
 double lineEq(double x,double y, Vec4 &v0,Vec4 &v1){
   return  x*(v0.y-v1.y)+y*(v1.x-v0.x) +v0.x*v1.y -v0.y*v1.x;
@@ -95,6 +120,7 @@ Vec3 normalizeVec3(Vec3 v)
     double d;
 
     d = magnitudeOfVec3(v);
+    if(d == 0 ) return v;
     result.x = v.x / d;
     result.y = v.y / d;
     result.z = v.z / d;

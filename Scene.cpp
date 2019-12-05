@@ -120,10 +120,12 @@ Matrix4 Scene::getScalingMatrix(Scaling* scale)
 Matrix4 Scene::getRotMatrix(Rotation *rot)
 {
 	Vec3 u(rot->ux, rot->uy, rot->uz, -1);
-	Vec3 v(-rot->uy, rot->ux, 0, -1);
+	Vec3 v=getV(u);
 	Vec3 w(crossProductVec3(u, v));
+
 	v = normalizeVec3(v);
 	w = normalizeVec3(w);
+	
 	double angle = rot->angle;
 	double r[4][4];
 	double M[4][4] = {
@@ -153,17 +155,28 @@ Matrix4 Scene::getRotMatrix(Rotation *rot)
 Matrix4 Scene::getMmodel(Model * model)
 {
 	Matrix4 Mmodel(getIdentityMatrix());
+
 	for(int i=0; i<model->numberOfTransformations ;i++)
 	{
 		if(model->transformationTypes[i]=='r')
+		{
+
 			Mmodel = multiplyMatrixWithMatrix(getRotMatrix(rotations[model->transformationIds[i]-1]),Mmodel);
+		std::cout<< endl<<*rotations[model->transformationIds[i]-1]<<"rotation"<<  '\n';
+		}
 
 		else if(model->transformationTypes[i]=='s')
+		{
 			Mmodel = multiplyMatrixWithMatrix(getScalingMatrix(scalings[model->transformationIds[i]-1]),Mmodel);
 
+		}
+
 		else if(model->transformationTypes[i]=='t')
+		{
 			Mmodel = multiplyMatrixWithMatrix(getTransMatrix(translations[model->transformationIds[i]-1]),Mmodel);
-	}
+
+		}
+}
 	return Mmodel;
 }
 
@@ -431,6 +444,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 		int triSize;
 		Model *model;
 
+		Matrix4 Mtotal(getIdentityMatrix());
 		Matrix4 Mcam(getMcam(camera));
 		Matrix4 Mvp(getMvp(camera));
 		Matrix4 MOrth(getMorth(camera));
@@ -439,22 +453,17 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 		if(projectionType==1){
 			Mp2o=multiplyMatrixWithMatrix(Mp2o,getMp2o(camera));
 		}
-;
 
-
+		Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
+		Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
+		Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
 		for(int modelNum=0; modelNum<modelSize; modelNum++)
 		{
-			Matrix4 Mtotal(getIdentityMatrix());
 			model = models[modelNum];
 
-			Mtotal = multiplyMatrixWithMatrix(getMmodel(model),Mtotal);
+			Matrix4 M = multiplyMatrixWithMatrix(Mtotal,getMmodel(model));
 
-			Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
 
-			Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
-
-			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
-			// std::cout << Mtotal << '\n';
 			triSize = model->numberOfTriangles;
 			for(int triNum=0; triNum<triSize ; triNum++ )
 			{
@@ -463,6 +472,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				Vec3 *vertex1  = vertices[tri.vertexIds[0]-1];
 				Vec3 *vertex2  = vertices[tri.vertexIds[1]-1];
 				Vec3 *vertex3  = vertices[tri.vertexIds[2]-1];
+
 				Vec4 v1(vertex1->x, vertex1->y, vertex1->z, 1, vertex1->colorId);
 
 				Vec4 v2(vertex2->x, vertex2->y, vertex2->z, 1, vertex2->colorId);
@@ -471,9 +481,9 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 
 
 
-				v1= multiplyMatrixWithVec4(Mtotal,v1);
-				v2= multiplyMatrixWithVec4(Mtotal,v2);
-				v3= multiplyMatrixWithVec4(Mtotal,v3);
+				v1= multiplyMatrixWithVec4(M,v1);
+				v2= multiplyMatrixWithVec4(M,v2);
+				v3= multiplyMatrixWithVec4(M,v3);
 
 				//culling
 				//clipping

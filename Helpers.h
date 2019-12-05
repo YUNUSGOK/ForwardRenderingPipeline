@@ -63,6 +63,9 @@ Vec4 multiplyVec4WithScalar(Vec4 v, double c);
  */
 void printVec3(Vec3 v);
 
+
+
+Vec3 getV(Vec3 u);
 /*
  * Check whether vec3 a and vec3 b are equal.
  * In case of equality, returns 1.
