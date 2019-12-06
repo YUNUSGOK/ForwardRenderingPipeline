@@ -32,7 +32,7 @@ public:
            double near, double far,
            int horRes, int verRes,
            string outputFileName);
-    
+
 
     Camera(const Camera &other);
 

@@ -61,8 +61,6 @@ Matrix4 Scene::getMp2o(Camera *camera)
 	return Matrix4(m);
 }
 
-
-
 Matrix4 Scene::getMorth(Camera *camera){
 	double n = camera->near;
 	double f = camera->far;
@@ -80,6 +78,7 @@ Matrix4 Scene::getMorth(Camera *camera){
 	return Matrix4(m);
 
 }
+
 Matrix4 Scene::getMvp(Camera *camera){
 	double m[4][4]=
 	{
@@ -90,7 +89,6 @@ Matrix4 Scene::getMvp(Camera *camera){
 	};
 	return Matrix4(m);
 }
-
 
 Matrix4 Scene::getTransMatrix(Translation *trans)
 {
@@ -115,7 +113,6 @@ Matrix4 Scene::getScalingMatrix(Scaling* scale)
 	return Matrix4(s);
 
 }
-
 
 Matrix4 Scene::getRotMatrix(Rotation *rot)
 {
@@ -176,10 +173,9 @@ Matrix4 Scene::getMmodel(Model * model)
 			Mmodel = multiplyMatrixWithMatrix(getTransMatrix(translations[model->transformationIds[i]-1]),Mmodel);
 
 		}
-}
+	}
 	return Mmodel;
 }
-
 
 void Scene::midpoint1(Vec4 &v1, Vec4 &v2 )
 {
@@ -208,7 +204,6 @@ void Scene::midpoint1(Vec4 &v1, Vec4 &v2 )
 		c = c+ deltaC;
 	}
 }
-
 
 void Scene::midpoint2(Vec4 &v1, Vec4 &v2 )
 {
@@ -239,8 +234,6 @@ void Scene::midpoint2(Vec4 &v1, Vec4 &v2 )
 	}
 
 }
-
-
 
 void Scene::midpoint3(Vec4 &v1, Vec4 &v2 )
 {
@@ -303,8 +296,6 @@ void Scene::midpoint4(Vec4 &v1, Vec4 &v2 )
 
 }
 
-
-
 void Scene::rasterline(Vec4 &v1, Vec4 &v2 )
 {
 	if(slope(v1,v2)<=1 && slope(v1,v2)>=0)
@@ -339,33 +330,38 @@ void Scene::rasterline(Vec4 &v1, Vec4 &v2 )
 
 }
 
-
-void Scene::rastertriangle(Vec4 &v0,Vec4 &v1,Vec4 &v2 )
+void Scene::rastertriangle(Vec4 &v0,Vec4 &v1,Vec4 &v2, Camera *camera )
 {
 	double a,b,c;
 	double ymin = threemin(v0.y, v1.y, v2.y);
 	double ymax = threemax(v0.y, v1.y, v2.y);
 	double xmin = threemin(v0.x, v1.x, v2.x);
 	double xmax = threemax(v0.x, v1.x, v2.x);
-
 	Color c0( *colorsOfVertices[v0.colorId-1]);
 	Color c1( *colorsOfVertices[v1.colorId-1]);
 	Color c2( *colorsOfVertices[v2.colorId-1]);
 	Color cres;
-
+	// cout << c0*3 << c1 << c2 << endl;
+	int sizeX = camera->horRes;
+	int sizeY = camera->verRes;
 	for(int i=xmin; i<xmax; i++)
 	{
 		for(int j = ymin ; j<ymax ; j++)
 		{
-			a = lineEq(i,j,v1,v2)/lineEq(v0.x,v0.y,v1,v2);
-			b = lineEq(i,j,v2,v0)/lineEq(v1.x,v1.y,v2,v0);
-			c = lineEq(i,j,v0,v1)/lineEq(v2.x,v2.y,v0,v1);
-			if(a>=0 &&b>=0 &&c>=0 )
-			{
-
-				cres = c0*a+c1*b+c2*c;
-				image[i][j] = cres.clippedColor();
-			}
+			// if (i >= 0 && j >= 0 && i < sizeY && j < sizeX) {
+				a = lineEq(i,j,v1,v2)/lineEq(v0.x,v0.y,v1,v2);
+				b = lineEq(i,j,v2,v0)/lineEq(v1.x,v1.y,v2,v0);
+				c = lineEq(i,j,v0,v1)/lineEq(v2.x,v2.y,v0,v1);
+				if((a>=0) && (b>=0) && (c>=0) && i >= 0 && j >= 0 && i < sizeX && j < sizeY)
+				{
+					//
+					cres = c0*a+c1*b+c2*c;
+					cres.clippedColor();
+					image[i][j] = cres;
+				}
+			// }
+			// cout << a  << b << c << endl;
+			// image[i][j] = c0.clippedColor(); //cres.clippedColor();
 		}
 	}
 
@@ -378,10 +374,15 @@ bool Scene::backFaceCulling(Vec4 &v0, Vec4 &v1,Vec4 &v2,Vec3 e)
 	Vec3 p1(v1.x,v1.y,v1.z,v1.colorId);
 	Vec3 p2(v2.x,v2.y,v2.z,v2.colorId);
 
-	Vec3 n = crossProductVec3(subtractVec3(p2,p1),subtractVec3(p0,p1));
-	return 0 > dotProductVec3(n,subtractVec3(p1,e));
+	// Vec3 n = crossProductVec3(subtractVec3(p2,p1),subtractVec3(p0,p1));
+	Vec3 n = crossProductVec3(subtractVec3(p1,p0),subtractVec3(p2,p0));
+	// return 0 > dotProductVec3(n,subtractVec3(p1,e));
+	double g =  dotProductVec3(n,subtractVec3(e,p0));
+	if (g >= 0)
+		return true;
+	else
+		return false;
 }
-
 
 bool Scene::visible(double den,double num, double & te, double & tl)
 {
@@ -403,7 +404,6 @@ bool Scene::visible(double den,double num, double & te, double & tl)
 	return true;
 
 }
-
 
 bool Scene::clipping(Vec4 &v0, Vec4 &v1, Camera *camera)
 {
@@ -457,12 +457,10 @@ bool Scene::clipping(Vec4 &v0, Vec4 &v1, Camera *camera)
 	return vis;
 
 }
+
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
-
-
 		int modelSize =models.size();
-
 		int triSize;
 		Model *model;
 
@@ -470,24 +468,32 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 		Matrix4 Mcam(getMcam(camera));
 		Matrix4 Mvp(getMvp(camera));
 		Matrix4 MOrth(getMorth(camera));
-		Matrix4 Mp2o(getIdentityMatrix());
+		//Matrix4 Mp2o(getIdentityMatrix());
+		Matrix4 Mp2o(getMp2o(camera));
+		Matrix4 Mper(multiplyMatrixWithMatrix(MOrth, Mp2o));
 
-		if(projectionType==1){
-			Mp2o=multiplyMatrixWithMatrix(Mp2o,getMp2o(camera));
+		// if(projectionType==1){
+		// 	Mp2o=multiplyMatrixWithMatrix(Mp2o,getMp2o(camera));
+		// }
+		//
+		// Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
+		// Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
+		// Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
+
+		if (projectionType == 1) {
+			Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
+			Mtotal = multiplyMatrixWithMatrix(Mper,Mtotal);
+		}
+		else {
+			Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
+			Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
 		}
 
 
-
-		Mtotal = multiplyMatrixWithMatrix(Mcam,Mtotal);
-		Mtotal = multiplyMatrixWithMatrix(Mp2o,Mtotal);
-		Mtotal = multiplyMatrixWithMatrix(MOrth,Mtotal);
 		for(int modelNum=0; modelNum<modelSize; modelNum++)
 		{
 			model = models[modelNum];
-
 			Matrix4 M = multiplyMatrixWithMatrix(Mtotal,getMmodel(model));
-
-
 			triSize = model->numberOfTriangles;
 			for(int triNum=0; triNum<triSize ; triNum++ )
 			{
@@ -498,16 +504,12 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				Vec3 *vertex3  = vertices[tri.vertexIds[2]-1];
 
 				Vec4 v1(vertex1->x, vertex1->y, vertex1->z, 1, vertex1->colorId);
-
 				Vec4 v2(vertex2->x, vertex2->y, vertex2->z, 1, vertex2->colorId);
-
 				Vec4 v3(vertex3->x, vertex3->y, vertex3->z, 1, vertex3->colorId);
 
-
-
-				v1= multiplyMatrixWithVec4(M,v1);
-				v2= multiplyMatrixWithVec4(M,v2);
-				v3= multiplyMatrixWithVec4(M,v3);
+				v1 = multiplyMatrixWithVec4(M,v1);
+				v2 = multiplyMatrixWithVec4(M,v2);
+				v3 = multiplyMatrixWithVec4(M,v3);
 
 				//culling
 				//clipping
@@ -551,9 +553,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				}
 				if(model->type ==1)//solid
 				{
-
-					rastertriangle(v1,v2,v3);
-
+						 rastertriangle(v1,v2,v3, camera);
 				}
 
 			}
