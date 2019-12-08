@@ -378,7 +378,7 @@ bool Scene::backFaceCulling(Vec4 &v0, Vec4 &v1,Vec4 &v2,Vec3 e)
 	Vec3 n = crossProductVec3(subtractVec3(p0,p1),subtractVec3(p2,p0));
 	// return 0 > dotProductVec3(n,subtractVec3(p1,e));
 	double g =  dotProductVec3(n,p0);
-	if (g > 0)
+	if (g >= 0)
 		return true;
 	else
 		return false;
