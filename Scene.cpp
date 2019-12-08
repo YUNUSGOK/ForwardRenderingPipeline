@@ -375,10 +375,10 @@ bool Scene::backFaceCulling(Vec4 &v0, Vec4 &v1,Vec4 &v2,Vec3 e)
 	Vec3 p2(v2.x,v2.y,v2.z,v2.colorId);
 
 	// Vec3 n = crossProductVec3(subtractVec3(p2,p1),subtractVec3(p0,p1));
-	Vec3 n = crossProductVec3(subtractVec3(p1,p0),subtractVec3(p2,p0));
+	Vec3 n = crossProductVec3(subtractVec3(p0,p1),subtractVec3(p2,p0));
 	// return 0 > dotProductVec3(n,subtractVec3(p1,e));
-	double g =  dotProductVec3(n,subtractVec3(e,p0));
-	if (g >= 0)
+	double g =  dotProductVec3(n,p0);
+	if (g > 0)
 		return true;
 	else
 		return false;
