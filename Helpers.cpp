@@ -11,6 +11,7 @@ using namespace std;
 /*
  * Calculate cross product of vec3 a, vec3 b and return resulting vec3.
  */
+
 Vec3 crossProductVec3(Vec3 a, Vec3 b)
 {
     Vec3 result;

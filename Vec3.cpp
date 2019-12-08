@@ -3,6 +3,24 @@
 
 using namespace std;
 
+Vec3 Vec3::operator-() {
+    Vec3 result;
+    result.x = -x;
+    result.y = -y;
+    result.z = -z;
+    result.colorId = colorId;
+    return result;
+}
+
+Vec3 Vec3::operator+(Vec3 & v) {
+    Vec3 result;
+    result.x = x + v.x;
+    result.y = y + v.y;
+    result.z = z + v.z;
+
+    return result;
+}
+
 Vec3::Vec3()
 {
     this->x = 0.0;

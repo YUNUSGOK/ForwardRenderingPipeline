@@ -373,13 +373,20 @@ bool Scene::backFaceCulling(Vec4 &v0, Vec4 &v1,Vec4 &v2,Vec3 e)
 	Vec3 p0(v0.x,v0.y,v0.z,v0.colorId);
 	Vec3 p1(v1.x,v1.y,v1.z,v1.colorId);
 	Vec3 p2(v2.x,v2.y,v2.z,v2.colorId);
-
+	Vec3 center;
+	// center = p0 + p1;
+	// center = center + p2;
+	// center =  multiplyVec3WithScalar(center, 1/3);
 
 	Vec3 n = crossProductVec3(subtractVec3(p1,p0),subtractVec3(p2,p0));
-	Vec3 mid = addVec3(p0,p1);
-	mid = addVec3(p2,mid);
-	mid = multiplyVec3WithScalar(mid,1/3);
-	double g =  dotProductVec3(n,subtractVec3(mid,e));
+	// Vec3 mid = addVec3(p0,p1);
+	// mid = addVec3(p2,mid);
+	center = multiplyVec3WithScalar(addVec3(addVec3(p0, p1), p2), 1/3);
+	// mid = multiplyVec3WithScalar(mid,1/3);
+	// double g =  dotProductVec3(n,subtractVec3(mid,e));
+	Vec3 s = subtractVec3(e, center);
+	double g =  dotProductVec3(n,s);
+
 	if (g > 0)
 		return true;
 	else
@@ -537,6 +544,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 				if(cullingEnabled == 1)
 				{
 					if(backFaceCulling(v1,v2,v3,camera->pos)){
+
 					continue;}
 				}
 				if(model->type ==0)//wireframe
