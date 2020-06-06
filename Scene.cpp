@@ -15,7 +15,7 @@
 #include "Vec3.h"
 #include "tinyxml2.h"
 #include "Helpers.h"
-
+#define M_PI 3.141593
 using namespace tinyxml2;
 using namespace std;
 
